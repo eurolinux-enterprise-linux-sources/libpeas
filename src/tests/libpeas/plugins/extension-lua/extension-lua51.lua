@@ -22,12 +22,16 @@ local Introspection = lgi.Introspection
 local Peas = lgi.Peas
 
 
-local ExtensionLuaPlugin = GObject.Object:derive('ExtensionLuaPlugin', {
-    Peas.Activatable,
-    Introspection.Base,
-    Introspection.Callable,
-    Introspection.HasPrerequisite
-})
+local ExtensionLuaAbstract =
+    Introspection.Abstract:derive('ExtensionLuaAbstract')
+
+
+local ExtensionLuaPlugin =
+    Introspection.Prerequisite:derive('ExtensionLuaPlugin', {
+                                      Peas.Activatable,
+                                      Introspection.Base,
+                                      Introspection.Callable,
+                                      Introspection.HasPrerequisite })
 
 ExtensionLuaPlugin._property.object =
     GObject.ParamSpecObject('object', 'object', 'object',
@@ -100,6 +104,6 @@ assert(pcall(function()
     __STRICT = true
 end))
 
-return { ExtensionLuaPlugin }
+return { ExtensionLuaAbstract, ExtensionLuaPlugin }
 
 -- ex:set ts=4 et sw=4 ai:

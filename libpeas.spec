@@ -1,4 +1,4 @@
-%if 0%{?rhel} == 0
+%if 0%{?fedora} || 0%{?rhel} > 7
 %global use_python3 1
 %else
 %global use_python3 0
@@ -7,13 +7,13 @@
 %global apiver 1.0
 
 Name:           libpeas
-Version:        1.20.0
+Version:        1.22.0
 Release:        1%{?dist}
 Summary:        Plug-ins implementation convenience library
 
 License:        LGPLv2+
 URL:            https://wiki.gnome.org/Projects/Libpeas
-Source0:        https://download.gnome.org/sources/%{name}/1.20/%{name}-%{version}.tar.xz
+Source0:        https://download.gnome.org/sources/%{name}/1.22/%{name}-%{version}.tar.xz
 
 BuildRequires:  chrpath
 BuildRequires:  gcc
@@ -150,6 +150,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor >&/dev/null || :
 %{_datadir}/glade/catalogs/libpeas-gtk.xml
 
 %changelog
+* Sun Sep 10 2017 Kalev Lember <klember@redhat.com> - 1.22.0-1
+- Update to 1.22.0
+- Resolves: #1569732
+
 * Mon Sep 19 2016 Kalev Lember <klember@redhat.com> - 1.20.0-1
 - Update to 1.20.0
 - Resolves: #1387015

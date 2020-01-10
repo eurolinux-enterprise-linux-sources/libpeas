@@ -76,9 +76,9 @@
     <keyword type="struct" name="PeasPluginInfo" link="PeasPluginInfo.html#PeasPluginInfo-struct"/>
     <keyword type="enum" name="enum PeasPluginInfoError" link="PeasPluginInfo.html#PeasPluginInfoError"/>
     <keyword type="function" name="peas_extension_get_extension_type ()" link="libpeas-PeasExtension.html#peas-extension-get-extension-type" deprecated="1.2."/>
-    <keyword type="function" name="peas_extension_call ()" link="libpeas-PeasExtension.html#peas-extension-call" deprecated="1.2: Use the interface directly instead."/>
-    <keyword type="function" name="peas_extension_call_valist ()" link="libpeas-PeasExtension.html#peas-extension-call-valist" deprecated="1.2: Use the interface directly instead."/>
-    <keyword type="function" name="peas_extension_callv ()" link="libpeas-PeasExtension.html#peas-extension-callv" deprecated="1.2: Use the interface directly instead."/>
+    <keyword type="function" name="peas_extension_call ()" link="libpeas-PeasExtension.html#peas-extension-call" deprecated="1.2: Use the object directly instead."/>
+    <keyword type="function" name="peas_extension_call_valist ()" link="libpeas-PeasExtension.html#peas-extension-call-valist" deprecated="1.2: Use the object directly instead."/>
+    <keyword type="function" name="peas_extension_callv ()" link="libpeas-PeasExtension.html#peas-extension-callv" deprecated="1.2: Use the object directly instead."/>
     <keyword type="typedef" name="PeasExtension" link="libpeas-PeasExtension.html#PeasExtension"/>
     <keyword type="function" name="PeasExtensionSetForeachFunc ()" link="PeasExtensionSet.html#PeasExtensionSetForeachFunc" since="1.2"/>
     <keyword type="function" name="peas_extension_set_call ()" link="PeasExtensionSet.html#peas-extension-set-call" deprecated="1.2: Use peas_extension_set_foreach() instead."/>

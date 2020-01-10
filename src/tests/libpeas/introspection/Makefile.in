@@ -97,9 +97,10 @@ LTLIBRARIES = $(noinst_LTLIBRARIES)
 am__DEPENDENCIES_1 =
 libintrospection_1_0_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 	$(top_builddir)/libpeas/libpeas-1.0.la
-am_libintrospection_1_0_la_OBJECTS = introspection-base.lo \
-	introspection-callable.lo introspection-has-prerequisite.lo \
-	introspection-unimplemented.lo
+am_libintrospection_1_0_la_OBJECTS = introspection-abstract.lo \
+	introspection-base.lo introspection-callable.lo \
+	introspection-has-prerequisite.lo \
+	introspection-prerequisite.lo introspection-unimplemented.lo
 libintrospection_1_0_la_OBJECTS =  \
 	$(am_libintrospection_1_0_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -393,12 +394,16 @@ libintrospection_1_0_la_LIBADD = \
 	$(top_builddir)/libpeas/libpeas-1.0.la
 
 libintrospection_1_0_la_SOURCES = \
+	introspection-abstract.c		\
+	introspection-abstract.h		\
 	introspection-base.c			\
 	introspection-base.h			\
 	introspection-callable.c		\
 	introspection-callable.h		\
 	introspection-has-prerequisite.c	\
 	introspection-has-prerequisite.h	\
+	introspection-prerequisite.c	        \
+	introspection-prerequisite.h	        \
 	introspection-unimplemented.c		\
 	introspection-unimplemented.h
 
@@ -474,9 +479,11 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/introspection-abstract.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/introspection-base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/introspection-callable.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/introspection-has-prerequisite.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/introspection-prerequisite.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/introspection-unimplemented.Plo@am__quote@
 
 .c.o:

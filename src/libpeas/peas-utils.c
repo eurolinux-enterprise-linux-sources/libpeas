@@ -3,6 +3,7 @@
  * This file is part of libpeas
  *
  * Copyright (C) 2010 Steve Frécinaux
+ * Copyright (C) 2011-2017 Garrett Regier
  *
  * libpeas is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -48,62 +49,153 @@ G_STATIC_ASSERT (G_N_ELEMENTS (all_plugin_loaders) == PEAS_UTILS_N_LOADERS);
 G_STATIC_ASSERT (G_N_ELEMENTS (all_plugin_loader_modules) == PEAS_UTILS_N_LOADERS);
 G_STATIC_ASSERT (G_N_ELEMENTS (conflicting_plugin_loaders) == PEAS_UTILS_N_LOADERS);
 
+static
+G_DEFINE_QUARK (peas-extension-base-class-and-interfaces-cache,
+                exten_type_cache)
+
 static void
-add_all_interfaces (GType      iface_type,
-                    GPtrArray *type_structs)
+add_all_prerequisites (GType      iface_type,
+                       GType     *base_type,
+                       GPtrArray *ifaces)
 {
   GType *prereq;
   guint n_prereq;
   guint i;
 
-  g_ptr_array_add (type_structs,
-                   g_type_default_interface_ref (iface_type));
+  g_ptr_array_add (ifaces, g_type_default_interface_ref (iface_type));
 
   prereq = g_type_interface_prerequisites (iface_type, &n_prereq);
 
   for (i = 0; i < n_prereq; ++i)
     {
       if (G_TYPE_IS_INTERFACE (prereq[i]))
-        add_all_interfaces (prereq[i], type_structs);
+        {
+          add_all_prerequisites (prereq[i], base_type, ifaces);
+          continue;
+        }
+
+      if (!G_TYPE_IS_OBJECT (prereq[i]))
+        continue;
+
+      if (*base_type != G_TYPE_INVALID)
+        {
+          /* We already have the descendant GType */
+          if (g_type_is_a (*base_type, prereq[i]))
+            continue;
+
+          /* Neither GType are descendant of the other, this is an
+           * error and GObject will not be able to create an object
+           */
+          g_warn_if_fail (g_type_is_a (prereq[i], *base_type));
+        }
+
+      *base_type = prereq[i];
     }
 
   g_free (prereq);
 }
 
-static GParamSpec *
-find_param_spec_in_interfaces (GPtrArray   *type_structs,
-                               const gchar *name)
+static gpointer *
+find_base_class_and_interfaces (GType exten_type)
+{
+  GPtrArray *results;
+  GType base_type = G_TYPE_INVALID;
+  static GMutex cache_lock;
+  gpointer *data, *cached_data;
+
+  results = g_ptr_array_new ();
+
+  /* This is used for the GObjectClass of the base_type */
+  g_ptr_array_add (results, NULL);
+
+  if (G_TYPE_IS_INTERFACE (exten_type))
+    {
+      add_all_prerequisites (exten_type, &base_type, results);
+    }
+  else
+    {
+      gint i;
+      GType *interfaces;
+
+      interfaces = g_type_interfaces (exten_type, NULL);
+      for (i = 0; interfaces[i] != G_TYPE_INVALID; ++i)
+        add_all_prerequisites (interfaces[i], &base_type, results);
+
+      base_type = exten_type;
+
+      g_free (interfaces);
+    }
+
+  if (base_type != G_TYPE_INVALID)
+    g_ptr_array_index (results, 0) = g_type_class_ref (base_type);
+
+  g_ptr_array_add (results, NULL);
+  data = g_ptr_array_free (results, FALSE);
+
+  g_mutex_lock (&cache_lock);
+  cached_data = g_type_get_qdata (exten_type, exten_type_cache_quark ());
+
+  if (cached_data != NULL)
+    {
+      g_free (data);
+      data = cached_data;
+    }
+  else
+    {
+      g_type_set_qdata (exten_type, exten_type_cache_quark (), data);
+    }
+
+  g_mutex_unlock (&cache_lock);
+  return data;
+}
+
+static inline gpointer *
+get_base_class_and_interfaces (GType          exten_type,
+                               GObjectClass **base_class)
+{
+  gpointer *data;
+
+  data = g_type_get_qdata (exten_type, exten_type_cache_quark ());
+  if (G_UNLIKELY (data == NULL))
+    data = find_base_class_and_interfaces (exten_type);
+
+  *base_class = data[0];
+  return &data[1];
+}
+
+static inline GParamSpec *
+find_param_spec_for_prerequisites (const gchar  *name,
+                                   GObjectClass *base_class,
+                                   gpointer     *ifaces)
 {
   guint i;
   GParamSpec *pspec = NULL;
 
-  for (i = 0; i < type_structs->len && pspec == NULL; ++i)
-    {
-      gpointer iface = g_ptr_array_index (type_structs, i);
+  if (base_class != NULL)
+    pspec = g_object_class_find_property (base_class, name);
 
-      pspec = g_object_interface_find_property (iface, name);
-    }
+  for (i = 0; ifaces[i] != NULL && pspec == NULL; ++i)
+    pspec = g_object_interface_find_property (ifaces[i], name);
 
   return pspec;
 }
 
 gboolean
-peas_utils_valist_to_parameter_list (GType         iface_type,
+peas_utils_valist_to_parameter_list (GType         exten_type,
                                      const gchar  *first_property,
                                      va_list       args,
                                      GParameter  **params,
                                      guint        *n_params)
 {
-  GPtrArray *type_structs;
+  gpointer *ifaces;
+  GObjectClass *base_class;
   const gchar *name;
   guint n_allocated_params;
 
-  g_return_val_if_fail (G_TYPE_IS_INTERFACE (iface_type), FALSE);
+  g_return_val_if_fail (G_TYPE_IS_INTERFACE (exten_type) ||
+                        G_TYPE_IS_OBJECT (exten_type), FALSE);
 
-  type_structs = g_ptr_array_new ();
-  g_ptr_array_set_free_func (type_structs,
-                             (GDestroyNotify) g_type_default_interface_unref);
-  add_all_interfaces (iface_type, type_structs);
+  ifaces = get_base_class_and_interfaces (exten_type, &base_class);
 
   *n_params = 0;
   n_allocated_params = 16;
@@ -113,12 +205,14 @@ peas_utils_valist_to_parameter_list (GType         iface_type,
   while (name)
     {
       gchar *error_msg = NULL;
-      GParamSpec *pspec = find_param_spec_in_interfaces (type_structs, name);
+      GParamSpec *pspec;
+
+      pspec = find_param_spec_for_prerequisites (name, base_class, ifaces);
 
       if (!pspec)
         {
           g_warning ("%s: type '%s' has no property named '%s'",
-                     G_STRFUNC, g_type_name (iface_type), name);
+                     G_STRFUNC, g_type_name (exten_type), name);
           goto error;
         }
 
@@ -146,8 +240,6 @@ peas_utils_valist_to_parameter_list (GType         iface_type,
       name = va_arg (args, gchar*);
     }
 
-  g_ptr_array_unref (type_structs);
-
   return TRUE;
 
 error:
@@ -156,8 +248,6 @@ error:
     g_value_unset (&(*params)[*n_params].value);
 
   g_free (*params);
-  g_ptr_array_unref (type_structs);
-
   return FALSE;
 }
 

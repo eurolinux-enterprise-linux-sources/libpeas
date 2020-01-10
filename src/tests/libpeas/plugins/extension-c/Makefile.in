@@ -112,7 +112,8 @@ libextension_c_missing_symbol_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 libextension_c_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 	$(top_builddir)/libpeas/libpeas-1.0.la \
 	$(builddir)/../../introspection/libintrospection-1.0.la
-am_libextension_c_la_OBJECTS = extension-c-plugin.lo
+am_libextension_c_la_OBJECTS = extension-c-abstract.lo \
+	extension-c-plugin.lo
 libextension_c_la_OBJECTS = $(am_libextension_c_la_OBJECTS)
 libextension_c_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
@@ -401,7 +402,9 @@ noinst_LTLIBRARIES = \
 	libextension-c-missing-symbol.la
 
 libextension_c_la_SOURCES = \
-	extension-c-plugin.c	\
+	extension-c-abstract.c  \
+	extension-c-abstract.h  \
+	extension-c-plugin.c    \
 	extension-c-plugin.h
 
 libextension_c_la_LDFLAGS = $(TEST_PLUGIN_LIBTOOL_FLAGS)
@@ -480,6 +483,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extension-c-abstract.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extension-c-missing-symbol-plugin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extension-c-plugin.Plo@am__quote@
 

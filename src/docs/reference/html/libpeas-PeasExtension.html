@@ -94,8 +94,8 @@ implemented using various languages.  As such, the application writer will
 use <a class="link" href="libpeas-PeasExtension.html#PeasExtension" title="PeasExtension"><span class="type">PeasExtension</span></a> instances to call methods on extension provided by
 loaded plugins.</p>
 <p>To properly use the proxy instances, you will need GObject-introspection
-data for the <a href="/opt/gnome/share/gtk-doc/html/gobject/GTypeModule.html"><span class="type">GInterface</span></a> or <span class="type">GObjectClass</span> you want to use as an extension
-point.  For instance, if you wish to use <a class="link" href="PeasActivatable.html" title="PeasActivatable"><span class="type">PeasActivatable</span></a>, you will need to
+data for the <span class="type">GType</span> you want to use as an extension point.
+For instance, if you wish to use <a class="link" href="PeasActivatable.html" title="PeasActivatable"><span class="type">PeasActivatable</span></a>, you will need to
 put the following code excerpt in the engine initialization code, in order
 to load the required "Peas" typelib:</p>
 <div class="informalexample">
@@ -112,7 +112,7 @@ to load the required "Peas" typelib:</p>
 </div>
 
 <p></p>
-<p>You should proceed the same way for any namespace which provides interfaces
+<p>You should proceed the same way for any namespace which provides types
 you want to use as extension points. GObject-introspection data is required
 for all the supported languages, even for C.</p>
 <p><a class="link" href="libpeas-PeasExtension.html#PeasExtension" title="PeasExtension"><span class="type">PeasExtension</span></a> does not provide any way to access the underlying object.
@@ -130,7 +130,7 @@ with.</p>
 <pre class="programlisting"><span class="returnvalue">GType</span>
 peas_extension_get_extension_type (<em class="parameter"><code><a class="link" href="libpeas-PeasExtension.html#PeasExtension" title="PeasExtension"><span class="type">PeasExtension</span></a> *exten</code></em>);</pre>
 <div class="warning"><p><code class="literal">peas_extension_get_extension_type</code> has been deprecated since version 1.2. and should not be used in newly-written code.</p></div>
-<p>Get the type of the extension interface of the object proxied by <em class="parameter"><code>exten</code></em>
+<p>Get the <span class="type">GType</span> of the extension proxied by <em class="parameter"><code>exten</code></em>
 .</p>
 <div class="refsect3">
 <a name="peas-extension-get-extension-type.parameters"></a><h4>Parameters</h4>
@@ -162,7 +162,7 @@ peas_extension_call (<em class="parameter"><code><a class="link" href="libpeas-P
                      <em class="parameter"><code>...</code></em>);</pre>
 <div class="warning">
 <p><code class="literal">peas_extension_call</code> has been deprecated since version 1.2 and should not be used in newly-written code.</p>
-<p>Use the interface directly instead.</p>
+<p>Use the object directly instead.</p>
 </div>
 <p>Call a method of the object behind <em class="parameter"><code>extension</code></em>
 .</p>
@@ -232,7 +232,7 @@ peas_extension_call_valist (<em class="parameter"><code><a class="link" href="li
                             <em class="parameter"><code><span class="type">va_list</span> args</code></em>);</pre>
 <div class="warning">
 <p><code class="literal">peas_extension_call_valist</code> has been deprecated since version 1.2 and should not be used in newly-written code.</p>
-<p>Use the interface directly instead.</p>
+<p>Use the object directly instead.</p>
 </div>
 <p>Call a method of the object behind <em class="parameter"><code>extension</code></em>
 , using <em class="parameter"><code>args</code></em>
@@ -280,7 +280,7 @@ peas_extension_callv (<em class="parameter"><code><a class="link" href="libpeas-
                       <em class="parameter"><code><span class="type">GIArgument</span> *return_value</code></em>);</pre>
 <div class="warning">
 <p><code class="literal">peas_extension_callv</code> has been deprecated since version 1.2 and should not be used in newly-written code.</p>
-<p>Use the interface directly instead.</p>
+<p>Use the object directly instead.</p>
 </div>
 <p>Call a method of the object behind <em class="parameter"><code>extension</code></em>
 , using <em class="parameter"><code>args</code></em>

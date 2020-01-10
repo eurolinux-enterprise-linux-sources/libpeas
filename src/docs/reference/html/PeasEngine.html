@@ -272,6 +272,9 @@
 <li class="listitem"><p>it will provide you an API to load, control and unload your
     plugins and their extensions from within your application.</p></li>
 </ul></div>
+<p>Since libpeas 1.22, <em class="parameter"><code>extension_type</code></em>
+ can be an Abstract <span class="type">GType</span>
+and not just an Interface <span class="type">GType</span>.</p>
 </div>
 <div class="refsect1">
 <a name="PeasEngine.functions_details"></a><h2>Functions</h2>
@@ -632,7 +635,6 @@ peas_engine_load_plugin (<em class="parameter"><code><a class="link" href="PeasE
  if it's not currently loaded.
 Emits the "load-plugin" signal; loading the plugin
 actually occurs in the default signal handler.</p>
-<p><span class="annotation">[<acronym title="This is the invoker for a virtual method."><span class="acronym">virtual</span></acronym> load_plugin]</span></p>
 <div class="refsect3">
 <a name="peas-engine-load-plugin.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
@@ -670,7 +672,6 @@ peas_engine_unload_plugin (<em class="parameter"><code><a class="link" href="Pea
 .
 Emits the "unload-plugin" signal; unloading the plugin
 actually occurs in the default signal handler.</p>
-<p><span class="annotation">[<acronym title="This is the invoker for a virtual method."><span class="acronym">virtual</span></acronym> unload_plugin]</span></p>
 <div class="refsect3">
 <a name="peas-engine-unload-plugin.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
@@ -735,6 +736,9 @@ peas_engine_provides_extension (<em class="parameter"><code><a class="link" href
 .
 If the <em class="parameter"><code>info</code></em>
  is not loaded than <code class="literal">FALSE</code> will always be returned.</p>
+<p>Since libpeas 1.22, <em class="parameter"><code>extension_type</code></em>
+ can be an Abstract <span class="type">GType</span>
+and not just an Interface <span class="type">GType</span>.</p>
 <div class="refsect3">
 <a name="peas-engine-provides-extension.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
@@ -780,7 +784,7 @@ peas_engine_create_extension (<em class="parameter"><code><a class="link" href="
                               <em class="parameter"><code>...</code></em>);</pre>
 <p>If the plugin identified by <em class="parameter"><code>info</code></em>
  implements the <em class="parameter"><code>extension_type</code></em>
- interface,
+,
 then this function will return a new instance of this implementation,
 wrapped in a new <a class="link" href="libpeas-PeasExtension.html#PeasExtension" title="PeasExtension"><span class="type">PeasExtension</span></a> instance. Otherwise, it will return <code class="literal">NULL</code>.</p>
 <p>When creating the new instance of the <em class="parameter"><code>extension_type</code></em>
@@ -791,6 +795,9 @@ handler (exactly like if you had called <code class="function">g_object_new()</c
 returned wrapped in a <a class="link" href="libpeas-PeasExtension.html#PeasExtension" title="PeasExtension"><span class="type">PeasExtension</span></a> proxy, following the current libpeas
 principle of never giving you the actual object (also because it might as
 well *not* be an actual object).</p>
+<p>Since libpeas 1.22, <em class="parameter"><code>extension_type</code></em>
+ can be an Abstract <span class="type">GType</span>
+and not just an Interface <span class="type">GType</span>.</p>
 <p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
 <div class="refsect3">
 <a name="peas-engine-create-extension.parameters"></a><h4>Parameters</h4>
@@ -848,9 +855,12 @@ peas_engine_create_extensionv (<em class="parameter"><code><a class="link" href=
                                <em class="parameter"><code><span class="type">GParameter</span> *parameters</code></em>);</pre>
 <p>If the plugin identified by <em class="parameter"><code>info</code></em>
  implements the <em class="parameter"><code>extension_type</code></em>
- interface,
+,
 then this function will return a new instance of this implementation,
 wrapped in a new <a class="link" href="libpeas-PeasExtension.html#PeasExtension" title="PeasExtension"><span class="type">PeasExtension</span></a> instance. Otherwise, it will return <code class="literal">NULL</code>.</p>
+<p>Since libpeas 1.22, <em class="parameter"><code>extension_type</code></em>
+ can be an Abstract <span class="type">GType</span>
+and not just an Interface <span class="type">GType</span>.</p>
 <p>See <a class="link" href="PeasEngine.html#peas-engine-create-extension" title="peas_engine_create_extension ()"><code class="function">peas_engine_create_extension()</code></a> for more information.</p>
 <p><span class="annotation">[<acronym title="Rename the original symbol's name to SYMBOL."><span class="acronym">rename-to</span></acronym> peas_engine_create_extension]</span></p>
 <div class="refsect3">
@@ -910,9 +920,12 @@ peas_engine_create_extension_valist (<em class="parameter"><code><a class="link"
                                      <em class="parameter"><code><span class="type">va_list</span> var_args</code></em>);</pre>
 <p>If the plugin identified by <em class="parameter"><code>info</code></em>
  implements the <em class="parameter"><code>extension_type</code></em>
- interface,
+,
 then this function will return a new instance of this implementation,
 wrapped in a new <a class="link" href="libpeas-PeasExtension.html#PeasExtension" title="PeasExtension"><span class="type">PeasExtension</span></a> instance. Otherwise, it will return <code class="literal">NULL</code>.</p>
+<p>Since libpeas 1.22, <em class="parameter"><code>extension_type</code></em>
+ can be an Abstract <span class="type">GType</span>
+and not just an Interface <span class="type">GType</span>.</p>
 <p>See <a class="link" href="PeasEngine.html#peas-engine-create-extension" title="peas_engine_create_extension ()"><code class="function">peas_engine_create_extension()</code></a> for more information.</p>
 <p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
 <div class="refsect3">

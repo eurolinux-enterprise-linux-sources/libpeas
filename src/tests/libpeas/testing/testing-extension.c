@@ -33,6 +33,7 @@
 #include "testing.h"
 #include "testing-extension.h"
 
+#include "introspection-abstract.h"
 #include "introspection-base.h"
 #include "introspection-callable.h"
 #include "introspection-has-prerequisite.h"
@@ -190,13 +191,20 @@ test_extension_create_with_prerequisite (PeasEngine     *engine,
                                          PeasPluginInfo *info)
 {
   PeasExtension *extension;
+  gint prerequisite_property = -1;
 
   extension = peas_engine_create_extension (engine, info,
                                             INTROSPECTION_TYPE_HAS_PREREQUISITE,
+                                            "prerequisite-property", 47,
                                             NULL);
 
   g_assert (INTROSPECTION_IS_HAS_PREREQUISITE (extension));
   g_assert (INTROSPECTION_IS_CALLABLE (extension));
+
+  g_object_get (extension,
+                "prerequisite-property", &prerequisite_property,
+                NULL);
+  g_assert_cmpint (prerequisite_property, ==, 47);
 
   g_object_unref (extension);
 }
@@ -254,6 +262,29 @@ test_extension_get_settings (PeasEngine     *engine,
   g_assert (G_IS_SETTINGS (settings));
 
   g_object_unref (settings);
+  g_object_unref (extension);
+}
+
+static void
+test_extension_abstract (PeasEngine     *engine,
+                         PeasPluginInfo *info)
+{
+  PeasExtension *extension;
+  IntrospectionAbstract *abstract;
+
+  g_assert (peas_engine_load_plugin (engine, info));
+
+  extension = peas_engine_create_extension (engine, info,
+                                            INTROSPECTION_TYPE_ABSTRACT,
+                                            "abstract-property", 47,
+                                            NULL);
+
+  abstract = INTROSPECTION_ABSTRACT (extension);
+
+  g_assert_cmpint (introspection_abstract_get_value (abstract), ==, 47);
+  introspection_abstract_set_value (abstract, -22);
+  g_assert_cmpint (introspection_abstract_get_value (abstract), ==, -22);
+
   g_object_unref (extension);
 }
 
@@ -472,6 +503,30 @@ test_extension_call_multi_args (PeasEngine     *engine,
   g_object_unref (extension);
 }
 
+static void
+test_extension_call_abstract (PeasEngine     *engine,
+                              PeasPluginInfo *info)
+{
+  PeasExtension *extension;
+  gint value = 0;
+
+  g_assert (peas_engine_load_plugin (engine, info));
+
+  extension = peas_engine_create_extension (engine, info,
+                                            INTROSPECTION_TYPE_ABSTRACT,
+                                            "abstract-property", 47,
+                                            NULL);
+
+  g_assert (peas_extension_call (extension, "get_value", &value));
+  g_assert_cmpint (value, ==, 47);
+
+  g_assert (peas_extension_call (extension, "set_value", -22));
+  g_assert (peas_extension_call (extension, "get_value", &value));
+  g_assert_cmpint (value, ==, -22);
+
+  g_object_unref (extension);
+}
+
 #define _EXTENSION_TEST(loader, path, ftest) \
   G_STMT_START { \
     gchar *full_path = g_strdup_printf (EXTENSION_TEST_NAME (%s, "%s"), \
@@ -526,6 +581,8 @@ testing_extension_basic (const gchar *loader_)
   _EXTENSION_TEST (loader, "plugin-info", plugin_info);
   _EXTENSION_TEST (loader, "get-settings", get_settings);
 
+  _EXTENSION_TEST (loader, "abstract", abstract);
+
   _EXTENSION_TEST (loader, "multiple-threads/global-loaders",
                    multiple_threads_global_loaders);
   _EXTENSION_TEST (loader, "multiple-threads/nonglobal-loaders",
@@ -546,6 +603,7 @@ testing_extension_callable (const gchar *loader)
   _EXTENSION_TEST (loader, "call-with-return", call_with_return);
   _EXTENSION_TEST (loader, "call-single-arg", call_single_arg);
   _EXTENSION_TEST (loader, "call-multi-args", call_multi_args);
+  _EXTENSION_TEST (loader, "call-abstract", call_abstract);
 }
 
 void
