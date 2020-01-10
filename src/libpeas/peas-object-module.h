@@ -7,19 +7,19 @@
  * Copyright (C) 2005-2007 Paolo Maggi
  * Copyright (C) 2008 Jesse van den Kieboom
  *
- * libpeas is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU Library General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
  *
- * libpeas is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ *  You should have received a copy of the GNU Library General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
 #ifndef __PEAS_OBJECT_MODULE_H__
@@ -87,36 +87,29 @@ GType               peas_object_module_get_type               (void) G_GNUC_CONS
 PeasObjectModule   *peas_object_module_new                    (const gchar      *module_name,
                                                                const gchar      *path,
                                                                gboolean          resident);
-PeasObjectModule   *peas_object_module_new_full               (const gchar      *module_name,
-                                                               const gchar      *path,
-                                                               gboolean          resident,
-                                                               gboolean          local_linkage);
-PeasObjectModule   *peas_object_module_new_embedded           (const gchar      *module_name,
-                                                               const gchar      *symbol);
 
 GObject            *peas_object_module_create_object          (PeasObjectModule *module,
-                                                               GType             exten_type,
+                                                               GType             interface,
                                                                guint             n_parameters,
                                                                GParameter       *parameters);
 gboolean            peas_object_module_provides_object        (PeasObjectModule *module,
-                                                               GType             exten_type);
+                                                               GType             interface);
 
 const gchar        *peas_object_module_get_path               (PeasObjectModule *module);
 const gchar        *peas_object_module_get_module_name        (PeasObjectModule *module);
-const gchar        *peas_object_module_get_symbol             (PeasObjectModule *module);
 
 GModule            *peas_object_module_get_library            (PeasObjectModule *module);
 
 void                peas_object_module_register_extension_factory
                                                               (PeasObjectModule *module,
-                                                               GType             exten_type,
+                                                               GType             iface_type,
                                                                PeasFactoryFunc   factory_func,
                                                                gpointer          user_data,
                                                                GDestroyNotify    destroy_func);
 void                peas_object_module_register_extension_type
                                                               (PeasObjectModule *module,
-                                                               GType             exten_type,
-                                                               GType             impl_type);
+                                                               GType             iface_type,
+                                                               GType             extension_type);
 
 G_END_DECLS
 

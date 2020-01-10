@@ -1,6 +1,6 @@
 lib_LTLIBRARIES = libpeas-gtk-1.0.la
 
-AM_CPPFLAGS = \
+INCLUDES = \
 	-I$(top_srcdir)			\
 	-I$(srcdir)			\
 	$(PEAS_CFLAGS)			\
@@ -19,13 +19,7 @@ libpeas_gtk_1_0_la_LIBADD = \
 	$(PEAS_GTK_LIBS)						\
 	$(top_builddir)/libpeas/libpeas-1.0.la
 
-if OS_OSX
-AM_CPPFLAGS += -xobjective-c
-libpeas_gtk_1_0_la_LDFLAGS += -framework Cocoa
-endif
-
 INST_H_FILES = \
-	peas-gtk-autocleanups.h		\
 	peas-gtk-configurable.h		\
 	peas-gtk-plugin-manager.h	\
 	peas-gtk-plugin-manager-view.h	\

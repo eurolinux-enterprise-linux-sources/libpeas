@@ -1,4 +1,4 @@
-AM_CPPFLAGS = \
+INCLUDES = \
 	-I$(top_srcdir)				\
 	-I$(srcdir)				\
 	-I$(srcdir)/../introspection		\

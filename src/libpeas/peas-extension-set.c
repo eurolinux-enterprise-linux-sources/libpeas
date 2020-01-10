@@ -4,19 +4,19 @@
  *
  * Copyright (C) 2010 Steve Frécinaux
  *
- * libpeas is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU Library General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
  *
- * libpeas is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ *  You should have received a copy of the GNU Library General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -26,12 +26,10 @@
 #include <string.h>
 
 #include "peas-extension-set.h"
-
-#include "peas-i18n.h"
-#include "peas-introspection.h"
 #include "peas-plugin-info.h"
 #include "peas-marshal.h"
-#include "peas-utils.h"
+#include "peas-helpers.h"
+#include "peas-introspection.h"
 
 /**
  * SECTION:peas-extension-set
@@ -88,13 +86,18 @@
  * ]|
  **/
 
+G_DEFINE_TYPE (PeasExtensionSet, peas_extension_set, G_TYPE_OBJECT);
+
 struct _PeasExtensionSetPrivate {
   PeasEngine *engine;
   GType exten_type;
   guint n_parameters;
   GParameter *parameters;
 
-  GQueue extensions;
+  GList *extensions;
+
+  gulong load_handler_id;
+  gulong unload_handler_id;
 };
 
 typedef struct {
@@ -126,28 +129,20 @@ enum {
 static guint signals[LAST_SIGNAL];
 static GParamSpec *properties[N_PROPERTIES] = { NULL };
 
-G_DEFINE_TYPE_WITH_PRIVATE (PeasExtensionSet,
-                            peas_extension_set,
-                            G_TYPE_OBJECT)
-
-#define GET_PRIV(o) \
-  (peas_extension_set_get_instance_private (o))
-
 static void
 set_construct_properties (PeasExtensionSet   *set,
                           PeasParameterArray *array)
 {
-  PeasExtensionSetPrivate *priv = GET_PRIV (set);
-  guint i;
+  unsigned i;
 
-  priv->n_parameters = array->n_parameters;
+  set->priv->n_parameters = array->n_parameters;
 
-  priv->parameters = g_new0 (GParameter, array->n_parameters);
+  set->priv->parameters = g_new0 (GParameter, array->n_parameters);
   for (i = 0; i < array->n_parameters; i++)
     {
-      priv->parameters[i].name = g_intern_string (array->parameters[i].name);
-      g_value_init (&priv->parameters[i].value, G_VALUE_TYPE (&array->parameters[i].value));
-      g_value_copy (&array->parameters[i].value, &priv->parameters[i].value);
+      set->priv->parameters[i].name = g_intern_string (array->parameters[i].name);
+      g_value_init (&set->priv->parameters[i].value, G_VALUE_TYPE (&array->parameters[i].value));
+      g_value_copy (&array->parameters[i].value, &set->priv->parameters[i].value);
     }
 }
 
@@ -158,15 +153,14 @@ peas_extension_set_set_property (GObject      *object,
                                  GParamSpec   *pspec)
 {
   PeasExtensionSet *set = PEAS_EXTENSION_SET (object);
-  PeasExtensionSetPrivate *priv = GET_PRIV (set);
 
   switch (prop_id)
     {
     case PROP_ENGINE:
-      priv->engine = g_value_get_object (value);
+      set->priv->engine = g_value_get_object (value);
       break;
     case PROP_EXTENSION_TYPE:
-      priv->exten_type = g_value_get_gtype (value);
+      set->priv->exten_type = g_value_get_gtype (value);
       break;
     case PROP_CONSTRUCT_PROPERTIES:
       set_construct_properties (set, g_value_get_pointer (value));
@@ -183,15 +177,14 @@ peas_extension_set_get_property (GObject    *object,
                                  GParamSpec *pspec)
 {
   PeasExtensionSet *set = PEAS_EXTENSION_SET (object);
-  PeasExtensionSetPrivate *priv = GET_PRIV (set);
 
   switch (prop_id)
     {
     case PROP_ENGINE:
-      g_value_set_object (value, priv->engine);
+      g_value_set_object (value, set->priv->engine);
       break;
     case PROP_EXTENSION_TYPE:
-      g_value_set_gtype (value, priv->exten_type);
+      g_value_set_gtype (value, set->priv->exten_type);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -202,7 +195,6 @@ static void
 add_extension (PeasExtensionSet *set,
                PeasPluginInfo   *info)
 {
-  PeasExtensionSetPrivate *priv = GET_PRIV (set);
   PeasExtension *exten;
   ExtensionItem *item;
 
@@ -210,20 +202,20 @@ add_extension (PeasExtensionSet *set,
   if (!peas_plugin_info_is_loaded (info))
     return;
 
-  if (!peas_engine_provides_extension (priv->engine, info,
-                                       priv->exten_type))
+  if (!peas_engine_provides_extension (set->priv->engine, info,
+                                       set->priv->exten_type))
     return;
 
-  exten = peas_engine_create_extensionv (priv->engine, info,
-                                         priv->exten_type,
-                                         priv->n_parameters,
-                                         priv->parameters);
+  exten = peas_engine_create_extensionv (set->priv->engine, info,
+                                         set->priv->exten_type,
+                                         set->priv->n_parameters,
+                                         set->priv->parameters);
 
-  item = g_slice_new (ExtensionItem);
+  item = (ExtensionItem *) g_slice_new (ExtensionItem);
   item->info = info;
   item->exten = exten;
 
-  g_queue_push_tail (&priv->extensions, item);
+  set->priv->extensions = g_list_prepend (set->priv->extensions, item);
   g_signal_emit (set, signals[EXTENSION_ADDED], 0, info, exten);
 }
 
@@ -242,18 +234,17 @@ static void
 remove_extension (PeasExtensionSet *set,
                   PeasPluginInfo   *info)
 {
-  PeasExtensionSetPrivate *priv = GET_PRIV (set);
   GList *l;
+  ExtensionItem *item;
 
-  for (l = priv->extensions.head; l != NULL; l = l->next)
+  for (l = set->priv->extensions; l; l = l->next)
     {
-      ExtensionItem *item = l->data;
-
+      item = (ExtensionItem *) l->data;
       if (item->info != info)
         continue;
 
       remove_extension_item (set, item);
-      g_queue_delete_link (&priv->extensions, l);
+      set->priv->extensions = g_list_delete_link (set->priv->extensions, l);
       return;
     }
 }
@@ -261,33 +252,32 @@ remove_extension (PeasExtensionSet *set,
 static void
 peas_extension_set_init (PeasExtensionSet *set)
 {
-  PeasExtensionSetPrivate *priv = GET_PRIV (set);
-
-  g_queue_init (&priv->extensions);
+  set->priv = G_TYPE_INSTANCE_GET_PRIVATE (set, PEAS_TYPE_EXTENSION_SET, PeasExtensionSetPrivate);
 }
 
 static void
 peas_extension_set_constructed (GObject *object)
 {
   PeasExtensionSet *set = PEAS_EXTENSION_SET (object);
-  PeasExtensionSetPrivate *priv = GET_PRIV (set);
   GList *plugins, *l;
 
-  if (priv->engine == NULL)
-    priv->engine = peas_engine_get_default ();
+  if (set->priv->engine == NULL)
+    set->priv->engine = peas_engine_get_default ();
 
-  g_object_ref (priv->engine);
+  g_object_ref (set->priv->engine);
 
-  plugins = (GList *) peas_engine_get_plugin_list (priv->engine);
+  plugins = (GList *) peas_engine_get_plugin_list (set->priv->engine);
   for (l = plugins; l; l = l->next)
     add_extension (set, (PeasPluginInfo *) l->data);
 
-  g_signal_connect_object (priv->engine, "load-plugin",
-                           G_CALLBACK (add_extension), set,
-                           G_CONNECT_AFTER | G_CONNECT_SWAPPED);
-  g_signal_connect_object (priv->engine, "unload-plugin",
-                           G_CALLBACK (remove_extension), set,
-                           G_CONNECT_SWAPPED);
+  set->priv->load_handler_id =
+          g_signal_connect_data (set->priv->engine, "load-plugin",
+                                 G_CALLBACK (add_extension), set,
+                                 NULL, G_CONNECT_AFTER | G_CONNECT_SWAPPED);
+  set->priv->unload_handler_id =
+          g_signal_connect_data (set->priv->engine, "unload-plugin",
+                                 G_CALLBACK (remove_extension), set,
+                                 NULL, G_CONNECT_SWAPPED);
 
   G_OBJECT_CLASS (peas_extension_set_parent_class)->constructed (object);
 }
@@ -296,29 +286,39 @@ static void
 peas_extension_set_dispose (GObject *object)
 {
   PeasExtensionSet *set = PEAS_EXTENSION_SET (object);
-  PeasExtensionSetPrivate *priv = GET_PRIV (set);
   GList *l;
 
-  if (priv->extensions.length > 0)
+  if (set->priv->load_handler_id != 0)
     {
-      for (l = priv->extensions.tail; l != NULL; l = l->prev)
+      g_signal_handler_disconnect (set->priv->engine, set->priv->load_handler_id);
+      set->priv->load_handler_id = 0;
+    }
+
+  if (set->priv->unload_handler_id != 0)
+    {
+      g_signal_handler_disconnect (set->priv->engine, set->priv->unload_handler_id);
+      set->priv->unload_handler_id = 0;
+    }
+
+  if (set->priv->extensions != NULL)
+    {
+      for (l = set->priv->extensions; l != NULL; l = l->next)
         remove_extension_item (set, (ExtensionItem *) l->data);
 
-      g_queue_clear (&priv->extensions);
+      g_list_free (set->priv->extensions);
+      set->priv->extensions = NULL;
     }
 
-  if (priv->parameters != NULL)
+  if (set->priv->parameters != NULL)
     {
-      while (priv->n_parameters-- > 0)
-        g_value_unset (&priv->parameters[priv->n_parameters].value);
+      while (set->priv->n_parameters-- > 0)
+        g_value_unset (&set->priv->parameters[set->priv->n_parameters].value);
 
-      g_free (priv->parameters);
-      priv->parameters = NULL;
+      g_free (set->priv->parameters);
+      set->priv->parameters = NULL;
     }
 
-  g_clear_object (&priv->engine);
-
-  G_OBJECT_CLASS (peas_extension_set_parent_class)->dispose (object);
+  g_clear_object (&set->priv->engine);
 }
 
 static gboolean
@@ -326,12 +326,11 @@ peas_extension_set_call_real (PeasExtensionSet *set,
                               const gchar      *method_name,
                               GIArgument       *args)
 {
-  PeasExtensionSetPrivate *priv = GET_PRIV (set);
   gboolean ret = TRUE;
   GList *l;
   GIArgument dummy;
 
-  for (l = priv->extensions.head; l != NULL; l = l->next)
+  for (l = set->priv->extensions; l; l = l->next)
     {
       ExtensionItem *item = (ExtensionItem *) l->data;
       ret = peas_extension_callv (item->exten, method_name, args, &dummy) && ret;
@@ -369,7 +368,7 @@ peas_extension_set_class_init (PeasExtensionSetClass *klass)
    * was created. You should set those up by yourself.
    */
   signals[EXTENSION_ADDED] =
-    g_signal_new (I_("extension-added"),
+    g_signal_new ("extension-added",
                   the_type,
                   G_SIGNAL_RUN_LAST,
                   G_STRUCT_OFFSET (PeasExtensionSetClass, extension_added),
@@ -397,7 +396,7 @@ peas_extension_set_class_init (PeasExtensionSetClass *klass)
    * instance is destroyed. You should clean those up by yourself.
    */
   signals[EXTENSION_REMOVED] =
-    g_signal_new (I_("extension-removed"),
+    g_signal_new ("extension-removed",
                   the_type,
                   G_SIGNAL_RUN_LAST,
                   G_STRUCT_OFFSET (PeasExtensionSetClass, extension_removed),
@@ -435,6 +434,7 @@ peas_extension_set_class_init (PeasExtensionSetClass *klass)
                           G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, N_PROPERTIES, properties);
+  g_type_class_add_private (klass, sizeof (PeasExtensionSetPrivate));
 }
 
 /**
@@ -451,13 +451,12 @@ PeasExtension *
 peas_extension_set_get_extension (PeasExtensionSet *set,
                                   PeasPluginInfo   *info)
 {
-  PeasExtensionSetPrivate *priv = GET_PRIV (set);
   GList *l;
 
   g_return_val_if_fail (PEAS_IS_EXTENSION_SET (set), NULL);
   g_return_val_if_fail (info != NULL, NULL);
 
-  for (l = priv->extensions.head; l != NULL; l = l->next)
+  for (l = set->priv->extensions; l != NULL; l = l->next)
     {
       ExtensionItem *item = l->data;
 
@@ -519,7 +518,6 @@ peas_extension_set_call_valist (PeasExtensionSet *set,
                                 const gchar      *method_name,
                                 va_list           va_args)
 {
-  PeasExtensionSetPrivate *priv = GET_PRIV (set);
   GICallableInfo *callable_info;
   GIArgument *args;
   gint n_args;
@@ -527,12 +525,12 @@ peas_extension_set_call_valist (PeasExtensionSet *set,
   g_return_val_if_fail (PEAS_IS_EXTENSION_SET (set), FALSE);
   g_return_val_if_fail (method_name != NULL, FALSE);
 
-  callable_info = peas_gi_get_method_info (priv->exten_type, method_name);
+  callable_info = peas_gi_get_method_info (set->priv->exten_type, method_name);
 
   if (callable_info == NULL)
     {
       g_warning ("Method '%s.%s' was not found",
-                 g_type_name (priv->exten_type), method_name);
+                 g_type_name (set->priv->exten_type), method_name);
       return FALSE;
     }
 
@@ -590,13 +588,12 @@ peas_extension_set_foreach (PeasExtensionSet            *set,
                             PeasExtensionSetForeachFunc  func,
                             gpointer                     data)
 {
-  PeasExtensionSetPrivate *priv = GET_PRIV (set);
   GList *l;
 
   g_return_if_fail (PEAS_IS_EXTENSION_SET (set));
   g_return_if_fail (func != NULL);
 
-  for (l = priv->extensions.head; l != NULL; l = l->next)
+  for (l = set->priv->extensions; l; l = l->next)
     {
       ExtensionItem *item = (ExtensionItem *) l->data;
 
@@ -605,7 +602,7 @@ peas_extension_set_foreach (PeasExtensionSet            *set,
 }
 
 /**
- * peas_extension_set_newv: (rename-to peas_extension_set_new)
+ * peas_extension_set_newv:
  * @engine: (allow-none): A #PeasEngine, or %NULL.
  * @exten_type: the extension #GType.
  * @n_parameters: the length of the @parameters array.
@@ -615,12 +612,11 @@ peas_extension_set_foreach (PeasExtensionSet            *set,
  *
  * If @engine is %NULL, then the default engine will be used.
  *
- * Since libpeas 1.22, @exten_type can be an Abstract #GType
- * and not just an Interface #GType.
- *
  * See peas_extension_set_new() for more information.
  *
  * Returns: (transfer full): a new instance of #PeasExtensionSet.
+ *
+ * Rename to: peas_extension_set_new
  */
 PeasExtensionSet *
 peas_extension_set_newv (PeasEngine *engine,
@@ -631,8 +627,7 @@ peas_extension_set_newv (PeasEngine *engine,
   PeasParameterArray construct_properties = { n_parameters, parameters };
 
   g_return_val_if_fail (engine == NULL || PEAS_IS_ENGINE (engine), NULL);
-  g_return_val_if_fail (G_TYPE_IS_INTERFACE (exten_type) ||
-                        G_TYPE_IS_ABSTRACT (exten_type), NULL);
+  g_return_val_if_fail (G_TYPE_IS_INTERFACE (exten_type), NULL);
 
   return PEAS_EXTENSION_SET (g_object_new (PEAS_TYPE_EXTENSION_SET,
                                            "engine", engine,
@@ -643,7 +638,7 @@ peas_extension_set_newv (PeasEngine *engine,
 
 /**
  * peas_extension_set_new_valist: (skip)
- * @engine: (allow-none): A #PeasEngine, or %NULL.
+ * @engine: A #PeasEngine, or %NULL.
  * @exten_type: the extension #GType.
  * @first_property: the name of the first property.
  * @var_args: the value of the first property, followed optionally by more
@@ -652,9 +647,6 @@ peas_extension_set_newv (PeasEngine *engine,
  * Create a new #PeasExtensionSet for the @exten_type extension type.
  *
  * If @engine is %NULL, then the default engine will be used.
- *
- * Since libpeas 1.22, @exten_type can be an Abstract #GType
- * and not just an Interface #GType.
  *
  * See peas_extension_set_new() for more information.
  *
@@ -671,12 +663,10 @@ peas_extension_set_new_valist (PeasEngine  *engine,
   PeasExtensionSet *set;
 
   g_return_val_if_fail (engine == NULL || PEAS_IS_ENGINE (engine), NULL);
-  g_return_val_if_fail (G_TYPE_IS_INTERFACE (exten_type) ||
-                        G_TYPE_IS_ABSTRACT (exten_type), NULL);
+  g_return_val_if_fail (G_TYPE_IS_INTERFACE (exten_type), NULL);
 
-  if (!peas_utils_valist_to_parameter_list (exten_type, first_property,
-                                            var_args, &parameters,
-                                            &n_parameters))
+  if (!_valist_to_parameter_list (exten_type, first_property,
+                                  var_args, &parameters, &n_parameters))
     {
       /* Already warned */
       return NULL;
@@ -693,7 +683,7 @@ peas_extension_set_new_valist (PeasEngine  *engine,
 
 /**
  * peas_extension_set_new: (skip)
- * @engine: (allow-none): A #PeasEngine, or %NULL.
+ * @engine: A #PeasEngine, or %NULL.
  * @exten_type: the extension #GType.
  * @first_property: the name of the first property.
  * @...: the value of the first property, followed optionally by more
@@ -710,9 +700,6 @@ peas_extension_set_new_valist (PeasEngine  *engine,
  *
  * If @engine is %NULL, then the default engine will be used.
  *
- * Since libpeas 1.22, @exten_type can be an Abstract #GType
- * and not just an Interface #GType.
- *
  * See peas_engine_create_extension() for more information.
  *
  * Returns: a new instance of #PeasExtensionSet.
@@ -727,8 +714,7 @@ peas_extension_set_new (PeasEngine  *engine,
   PeasExtensionSet *set;
 
   g_return_val_if_fail (engine == NULL || PEAS_IS_ENGINE (engine), NULL);
-  g_return_val_if_fail (G_TYPE_IS_INTERFACE (exten_type) ||
-                        G_TYPE_IS_ABSTRACT (exten_type), NULL);
+  g_return_val_if_fail (G_TYPE_IS_INTERFACE (exten_type), NULL);
 
   va_start (var_args, first_property);
   set = peas_extension_set_new_valist (engine, exten_type, first_property, var_args);

@@ -5,3 +5,4 @@ Name=Nonexistent Dependency
 Description=This plugin has a nonexistent dependency.
 Authors=Garrett Regier
 Copyright=Copyright © 2011 Garrett Regier
+Website=http://live.gnome.org/Libpeas

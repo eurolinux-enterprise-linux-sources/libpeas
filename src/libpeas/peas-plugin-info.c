@@ -5,19 +5,19 @@
  * Copyright (C) 2002-2005 - Paolo Maggi
  * Copyright (C) 2007 - Steve Frécinaux
  *
- * libpeas is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU Library General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
  *
- * libpeas is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ *  You should have received a copy of the GNU Library General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -29,7 +29,6 @@
 
 #include "peas-i18n.h"
 #include "peas-plugin-info-priv.h"
-#include "peas-utils.h"
 
 #ifdef G_OS_WIN32
 #define OS_HELP_KEY "Help-Windows"
@@ -51,19 +50,14 @@
  * |[
  * [Plugin]
  * Module=helloworld
- * Depends=foo;bar;baz
- * Loader=python3
  * Name=Hello World
  * Description=Displays "Hello World"
  * Authors=Steve Frécinaux &lt;code@istique.net&gt;
  * Copyright=Copyright © 2009-10 Steve Frécinaux
- * Website=https://wiki.gnome.org/Projects/Libpeas
- * Help=http://library.gnome.org/devel/libpeas/stable/
- * Hidden=false
+ * Website=http://live.gnome.org/Libpeas
+ * Help=http://library.gnome.org/devel/libpeas/unstable/
  * ]|
  **/
-
-G_DEFINE_QUARK (peas-plugin-info-error, peas_plugin_info_error)
 
 G_DEFINE_BOXED_TYPE (PeasPluginInfo, peas_plugin_info,
                      _peas_plugin_info_ref,
@@ -82,10 +76,10 @@ _peas_plugin_info_unref (PeasPluginInfo *info)
   if (!g_atomic_int_dec_and_test (&info->refcount))
     return;
 
-  g_free (info->filename);
   g_free (info->module_dir);
   g_free (info->data_dir);
-  g_free (info->embedded);
+  if (info->schema_source != NULL)
+    g_settings_schema_source_unref (info->schema_source);
   g_free (info->module_name);
   g_strfreev (info->dependencies);
   g_free (info->name);
@@ -93,20 +87,30 @@ _peas_plugin_info_unref (PeasPluginInfo *info)
   g_free (info->icon_name);
   g_free (info->website);
   g_free (info->copyright);
+  g_free (info->loader);
   g_free (info->version);
   g_free (info->help_uri);
   g_strfreev (info->authors);
-
-  if (info->schema_source != NULL)
-    g_settings_schema_source_unref (info->schema_source);
+  if (info->error != NULL)
+    g_error_free (info->error);
 
   if (info->external_data != NULL)
     g_hash_table_unref (info->external_data);
 
-  if (info->error != NULL)
-    g_error_free (info->error);
-
   g_free (info);
+}
+
+
+GQuark
+peas_plugin_info_error_quark (void)
+{
+  static volatile gsize quark = 0;
+
+	if (g_once_init_enter (&quark))
+		g_once_init_leave (&quark,
+		                   g_quark_from_static_string ("peas-plugin-info-error"));
+
+	return quark;
 }
 
 /*
@@ -124,112 +128,48 @@ _peas_plugin_info_new (const gchar *filename,
                        const gchar *module_dir,
                        const gchar *data_dir)
 {
-  gsize i;
-  gboolean is_resource;
-  gchar *loader = NULL;
-  gchar **strv, **keys;
   PeasPluginInfo *info;
-  GKeyFile *plugin_file;
-  GBytes *bytes = NULL;
+  GKeyFile *plugin_file = NULL;
+  gchar *str;
+  gchar **strv;
+  gboolean b;
   GError *error = NULL;
+  gchar **keys;
+  gsize i;
 
   g_return_val_if_fail (filename != NULL, NULL);
-
-  is_resource = g_str_has_prefix (filename, "resource://");
 
   info = g_new0 (PeasPluginInfo, 1);
   info->refcount = 1;
 
   plugin_file = g_key_file_new ();
-  
-  if (is_resource)
+  if (!g_key_file_load_from_file (plugin_file, filename, G_KEY_FILE_NONE, NULL))
     {
-      bytes = g_resources_lookup_data (filename + strlen ("resource://"),
-                                       G_RESOURCE_LOOKUP_FLAGS_NONE,
-                                       &error);
-    }
-  else
-    {
-      gchar *content;
-      gsize length;
-
-      if (g_file_get_contents (filename, &content, &length, &error))
-        bytes = g_bytes_new_take (content, length);
-    }
-
-  if (bytes == NULL ||
-      !g_key_file_load_from_data (plugin_file,
-                                  g_bytes_get_data (bytes, NULL),
-                                  g_bytes_get_size (bytes),
-                                  G_KEY_FILE_NONE, &error))
-    {
-      g_warning ("Bad plugin file '%s': %s", filename, error->message);
-      g_error_free (error);
+      g_warning ("Bad plugin file: '%s'", filename);
       goto error;
     }
 
   /* Get module name */
-  info->module_name = g_key_file_get_string (plugin_file, "Plugin",
-                                             "Module", NULL);
-  if (info->module_name == NULL || *info->module_name == '\0')
+  str = g_key_file_get_string (plugin_file, "Plugin", "Module", NULL);
+
+  if ((str != NULL) && (*str != '\0'))
     {
-      g_warning ("Could not find 'Module' in '[Plugin]' section in '%s'",
-                 filename);
+      info->module_name = str;
+    }
+  else
+    {
+      g_warning ("Could not find 'Module' in '[Plugin]' section in '%s'", filename);
       goto error;
     }
 
   /* Get Name */
-  info->name = g_key_file_get_locale_string (plugin_file, "Plugin",
+  str = g_key_file_get_locale_string (plugin_file, "Plugin",
                                       "Name", NULL, NULL);
-  if (info->name == NULL || *info->name == '\0')
-    {
-      g_warning ("Could not find 'Name' in '[Plugin]' section in '%s'",
-                 filename);
-      goto error;
-    }
-
-  /* Get the loader for this plugin */
-  loader = g_key_file_get_string (plugin_file, "Plugin", "Loader", NULL);
-  if (loader == NULL || *loader == '\0')
-    {
-      /* Default to the C loader */
-      info->loader_id = PEAS_UTILS_C_LOADER_ID;
-    }
+  if (str)
+    info->name = str;
   else
     {
-      info->loader_id = peas_utils_get_loader_id (loader);
-
-      if (info->loader_id == -1)
-        {
-          g_warning ("Unkown 'Loader' in '[Plugin]' section in '%s': %s",
-                     filename, loader);
-          goto error;
-        }
-    }
-
-  /* Get Embedded */
-  info->embedded = g_key_file_get_string (plugin_file, "Plugin",
-                                          "Embedded", NULL);
-  if (info->embedded != NULL)
-    {
-      if (info->loader_id != PEAS_UTILS_C_LOADER_ID)
-        {
-          g_warning ("Bad plugin file '%s': embedded plugins "
-                     "must use the C plugin loader", filename);
-          goto error;
-        }
-
-      if (!is_resource)
-        {
-          g_warning ("Bad plugin file '%s': embedded plugins "
-                     "must be a resource", filename);
-          goto error;
-        }
-    }
-  else if (is_resource)
-    {
-      g_warning ("Bad plugin file '%s': resource plugins must be embedded",
-                 filename);
+      g_warning ("Could not find 'Name' in '[Plugin]' section in '%s'", filename);
       goto error;
     }
 
@@ -240,13 +180,30 @@ _peas_plugin_info_new (const gchar *filename,
   if (info->dependencies == NULL)
     info->dependencies = g_new0 (gchar *, 1);
 
+  /* Get the loader for this plugin */
+  str = g_key_file_get_string (plugin_file, "Plugin", "Loader", NULL);
+
+  if ((str != NULL) && (*str != '\0'))
+    {
+      info->loader = str;
+    }
+  else
+    {
+      /* default to the C loader */
+      info->loader = g_strdup ("C");
+    }
+
   /* Get Description */
-  info->desc = g_key_file_get_locale_string (plugin_file, "Plugin",
-                                             "Description", NULL, NULL);
+  str = g_key_file_get_locale_string (plugin_file, "Plugin",
+                                      "Description", NULL, NULL);
+  if (str)
+    info->desc = str;
 
   /* Get Icon */
-  info->icon_name = g_key_file_get_locale_string (plugin_file, "Plugin",
-                                                  "Icon", NULL, NULL);
+  str = g_key_file_get_locale_string (plugin_file, "Plugin",
+                                      "Icon", NULL, NULL);
+  if (str)
+    info->icon_name = str;
 
   /* Get Authors */
   info->authors = g_key_file_get_string_list (plugin_file, "Plugin",
@@ -257,7 +214,7 @@ _peas_plugin_info_new (const gchar *filename,
   /* Get Copyright */
   strv = g_key_file_get_string_list (plugin_file, "Plugin",
                                      "Copyright", NULL, NULL);
-  if (strv != NULL)
+  if (strv)
     {
       info->copyright = g_strjoinv ("\n", strv);
 
@@ -265,27 +222,39 @@ _peas_plugin_info_new (const gchar *filename,
     }
 
   /* Get Website */
-  info->website = g_key_file_get_string (plugin_file, "Plugin",
-                                         "Website", NULL);
+  str = g_key_file_get_string (plugin_file, "Plugin", "Website", NULL);
+  if (str)
+    info->website = str;
 
   /* Get Version */
-  info->version = g_key_file_get_string (plugin_file, "Plugin",
-                                         "Version", NULL);
+  str = g_key_file_get_string (plugin_file, "Plugin", "Version", NULL);
+  if (str)
+    info->version = str;
 
   /* Get Help URI */
-  info->help_uri = g_key_file_get_string (plugin_file, "Plugin",
-                                          OS_HELP_KEY, NULL);
-  if (info->help_uri == NULL)
-    info->help_uri = g_key_file_get_string (plugin_file, "Plugin",
-                                            "Help", NULL);
+  str = g_key_file_get_string (plugin_file, "Plugin", OS_HELP_KEY, NULL);
+  if (str)
+    info->help_uri = str;
+  else
+    {
+      str = g_key_file_get_string (plugin_file, "Plugin", "Help", NULL);
+      if (str)
+        info->help_uri = str;
+    }
 
   /* Get Builtin */
-  info->builtin = g_key_file_get_boolean (plugin_file, "Plugin",
-                                          "Builtin", NULL);
+  b = g_key_file_get_boolean (plugin_file, "Plugin", "Builtin", &error);
+  if (error != NULL)
+    g_clear_error (&error);
+  else
+    info->builtin = b;
 
   /* Get Hidden */
-  info->hidden = g_key_file_get_boolean (plugin_file, "Plugin",
-                                         "Hidden", NULL);
+  b = g_key_file_get_boolean (plugin_file, "Plugin", "Hidden", &error);
+  if (error != NULL)
+    g_clear_error (&error);
+  else
+    info->hidden = b;
 
   keys = g_key_file_get_keys (plugin_file, "Plugin", NULL, NULL);
 
@@ -307,14 +276,10 @@ _peas_plugin_info_new (const gchar *filename,
 
   g_strfreev (keys);
 
-  g_free (loader);
-  g_bytes_unref (bytes);
   g_key_file_free (plugin_file);
 
-  info->filename = g_strdup (filename);
   info->module_dir = g_strdup (module_dir);
-  info->data_dir = g_build_path (is_resource ? "/" : G_DIR_SEPARATOR_S,
-                                 data_dir, info->module_name, NULL);
+  info->data_dir = g_build_filename (data_dir, info->module_name, NULL);
 
   /* If we know nothing about the availability of the plugin,
      set it as available */
@@ -323,13 +288,9 @@ _peas_plugin_info_new (const gchar *filename,
   return info;
 
 error:
-
-  g_free (info->embedded);
-  g_free (loader);
   g_free (info->module_name);
   g_free (info->name);
   g_free (info);
-  g_clear_pointer (&bytes, g_bytes_unref);
   g_key_file_free (plugin_file);
 
   return NULL;
@@ -501,8 +462,6 @@ peas_plugin_info_get_data_dir (const PeasPluginInfo *info)
  * will be made to create it.
  *
  * Returns: (transfer full): a new #GSettings, or %NULL.
- *
- * Since: 1.4
  */
 GSettings *
 peas_plugin_info_get_settings (const PeasPluginInfo *info,
@@ -608,10 +567,8 @@ peas_plugin_info_has_dependency (const PeasPluginInfo *info,
   g_return_val_if_fail (module_name != NULL, FALSE);
 
   for (i = 0; info->dependencies[i] != NULL; i++)
-    {
-      if (g_ascii_strcasecmp (module_name, info->dependencies[i]) == 0)
-        return TRUE;
-    }
+    if (g_ascii_strcasecmp (module_name, info->dependencies[i]) == 0)
+      return TRUE;
 
   return FALSE;
 }
@@ -676,10 +633,12 @@ peas_plugin_info_get_icon_name (const PeasPluginInfo *info)
 {
   g_return_val_if_fail (info != NULL, NULL);
 
+  /* use the libpeas-plugin icon as a default if the plugin does not
+     have its own */
   if (info->icon_name != NULL)
     return info->icon_name;
-
-  return "libpeas-plugin";
+  else
+    return "libpeas-plugin";
 }
 
 /**
@@ -793,8 +752,6 @@ peas_plugin_info_get_help_uri (const PeasPluginInfo *info)
  * but not when specifying the value in the file.
  *
  * Returns: the external data, or %NULL if the external data could not be found.
- *
- * Since: 1.6
  */
 const gchar *
 peas_plugin_info_get_external_data (const PeasPluginInfo *info,

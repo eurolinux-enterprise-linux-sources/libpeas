@@ -4,19 +4,19 @@
  *
  * Copyright (C) 2010 - Garrett Regier
  *
- * libpeas is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU Library General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
  *
- * libpeas is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ *  You should have received a copy of the GNU Library General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
 #ifndef __INTROSPECTION_CALLABLE_H__
@@ -42,7 +42,7 @@ struct _IntrospectionCallableInterface {
   GTypeInterface g_iface;
 
   /* Virtual public methods */
-  gchar       *(*call_with_return) (IntrospectionCallable *callable);
+  const gchar *(*call_with_return) (IntrospectionCallable *callable);
   void         (*call_no_args)     (IntrospectionCallable *callable);
   void         (*call_single_arg)  (IntrospectionCallable *callable,
                                     gboolean              *called);
@@ -60,7 +60,7 @@ struct _IntrospectionCallableInterface {
  */
 GType        introspection_callable_get_type         (void) G_GNUC_CONST;
 
-gchar       *introspection_callable_call_with_return (IntrospectionCallable *callable);
+const gchar *introspection_callable_call_with_return (IntrospectionCallable *callable);
 
 void         introspection_callable_call_no_args     (IntrospectionCallable *callable);
 void         introspection_callable_call_single_arg  (IntrospectionCallable *callable,

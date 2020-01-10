@@ -1,14 +1,14 @@
 lib_LTLIBRARIES = libpeas-1.0.la
 
-AM_CPPFLAGS =				\
-	-I$(top_srcdir)			\
-	-I$(srcdir)			\
-	$(PEAS_CFLAGS)			\
-	$(IGE_MAC_CFLAGS)		\
-	$(GCOV_CFLAGS)			\
-	$(WARN_CFLAGS)			\
-	$(DISABLE_DEPRECATED)		\
-	-DDATADIR=\""$(datadir)"\"	\
+INCLUDES =								\
+	-I$(top_srcdir)							\
+	-I$(srcdir)							\
+	$(PEAS_CFLAGS)							\
+	$(IGE_MAC_CFLAGS)						\
+	$(GCOV_CFLAGS)							\
+	$(WARN_CFLAGS)							\
+	$(DISABLE_DEPRECATED)						\
+	-DDATADIR=\""$(datadir)"\"					\
 	-DLIBDIR=\""$(libdir)"\"
 
 libpeas_1_0_la_LDFLAGS = \
@@ -16,15 +16,9 @@ libpeas_1_0_la_LDFLAGS = \
 	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) \
 	-export-dynamic -no-undefined -export-symbols-regex "^[^_].*"
 
-if OS_OSX
-AM_CPPFLAGS += -xobjective-c
-libpeas_1_0_la_LDFLAGS += -framework Cocoa
-endif
-
-libpeas_1_0_la_LIBADD = $(PEAS_LIBS)
+libpeas_1_0_la_LIBADD = $(PEAS_LIBS) $(IGE_MAC_LIBS)
 
 INST_H_FILES =			\
-	peas-autocleanups.h	\
 	peas-plugin-info.h	\
 	peas-object-module.h	\
 	peas-extension-base.h	\
@@ -38,12 +32,14 @@ NOINST_H_FILES =			\
 	peas-debug.h			\
 	peas-dirs.h			\
 	peas-engine-priv.h		\
+	peas-extension-wrapper.h	\
+	peas-extension-subclasses.h	\
+	peas-helpers.h			\
 	peas-i18n.h			\
 	peas-introspection.h		\
 	peas-plugin-info-priv.h		\
 	peas-plugin-loader.h		\
-	peas-plugin-loader-c.h		\
-	peas-utils.h
+	peas-plugin-loader-c.h
 
 C_FILES =				\
 	peas-activatable.c		\
@@ -53,13 +49,15 @@ C_FILES =				\
 	peas-extension.c		\
 	peas-extension-base.c		\
 	peas-extension-set.c		\
+	peas-extension-wrapper.c	\
+	peas-extension-subclasses.c	\
+	peas-helpers.c			\
 	peas-i18n.c			\
 	peas-introspection.c		\
 	peas-object-module.c		\
 	peas-plugin-info.c		\
 	peas-plugin-loader.c		\
-	peas-plugin-loader-c.c		\
-	peas-utils.c
+	peas-plugin-loader-c.c
 
 BUILT_SOURCES = \
 	peas-marshal.c			\

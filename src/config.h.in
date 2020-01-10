@@ -1,9 +1,10 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
-/* Define to compile with Lua support */
-#undef ENABLE_LUA51
+/* Define to compile with GJS support */
+#undef ENABLE_GJS
 
-/* Defined if native language support should be enabled. */
+/* Define to 1 if translation of program messages to the user's native
+   language is requested. */
 #undef ENABLE_NLS
 
 /* Define to compile with Python 2 support */
@@ -11,6 +12,9 @@
 
 /* Define to compile with Python 3 support */
 #undef ENABLE_PYTHON3
+
+/* Define to compile with Seed support */
+#undef ENABLE_SEED
 
 /* maximum gdk version */
 #undef GDK_VERSION_MAX_ALLOWED
@@ -30,11 +34,29 @@
 /* Log domain */
 #undef G_LOG_DOMAIN
 
+/* Define to 1 if you have the MacOS X function CFLocaleCopyCurrent in the
+   CoreFoundation framework. */
+#undef HAVE_CFLOCALECOPYCURRENT
+
+/* Define to 1 if you have the MacOS X function CFPreferencesCopyAppValue in
+   the CoreFoundation framework. */
+#undef HAVE_CFPREFERENCESCOPYAPPVALUE
+
+/* Define if the GNU dcgettext() function is already present or preinstalled.
+   */
+#undef HAVE_DCGETTEXT
+
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
 /* Define to 1 if you have the `fsync' function. */
 #undef HAVE_FSYNC
+
+/* Define if the GNU gettext() function is already present or preinstalled. */
+#undef HAVE_GETTEXT
+
+/* Define if you have the iconv() function and it works. */
+#undef HAVE_ICONV
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
@@ -63,15 +85,6 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
-/* LGI major version. */
-#undef LGI_MAJOR_VERSION
-
-/* LGI micro version. */
-#undef LGI_MICRO_VERSION
-
-/* LGI minor version. */
-#undef LGI_MINOR_VERSION
-
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
    */
 #undef LT_OBJDIR
@@ -99,6 +112,9 @@
 
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
+
+/* Disable deprecated features */
+#undef PEAS_DISABLE_DEPRECATED_FEATURES
 
 /* Gedit Plugins Engine major version */
 #undef PEAS_MAJOR_VERSION

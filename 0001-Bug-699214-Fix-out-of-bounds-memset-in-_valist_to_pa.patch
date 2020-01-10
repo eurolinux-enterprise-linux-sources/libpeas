@@ -1,0 +1,26 @@
+From 85f04f4cc32523d6506de091a04d5bb432c9cf2a Mon Sep 17 00:00:00 2001
+From: Garrett Regier <garrettregier@gmail.com>
+Date: Fri, 14 Jun 2013 10:30:17 -0700
+Subject: [PATCH] Bug 699214 - Fix out-of-bounds memset in
+ _valist_to_parameter_list
+
+---
+ libpeas/peas-helpers.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/libpeas/peas-helpers.c b/libpeas/peas-helpers.c
+index 185694c..af30eec 100644
+--- a/libpeas/peas-helpers.c
++++ b/libpeas/peas-helpers.c
+@@ -110,7 +110,7 @@ _valist_to_parameter_list (GType         iface_type,
+         {
+           n_allocated_params += 16;
+           *params = g_renew (GParameter, *params, n_allocated_params);
+-          memset (*params + sizeof (GParameter) * (n_allocated_params - 16),
++          memset (*params + (n_allocated_params - 16),
+                   0, sizeof (GParameter) * 16);
+         }
+ 
+-- 
+1.8.2.1
+

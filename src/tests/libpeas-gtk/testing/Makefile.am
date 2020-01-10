@@ -1,6 +1,6 @@
 noinst_LTLIBRARIES = libtesting.la
 
-AM_CPPFLAGS = \
+INCLUDES = \
 	-I$(top_srcdir)				\
 	-I$(srcdir)				\
 	-I$(srcdir)/../../testing-util		\

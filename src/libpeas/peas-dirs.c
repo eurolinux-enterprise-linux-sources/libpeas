@@ -4,115 +4,30 @@
  *
  * Copyright (C) 2008 Ignacio Casal Quinteiro
  *
- * libpeas is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU Library General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
  *
- * libpeas is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ *  You should have received a copy of the GNU Library General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
 
-#include "peas-dirs.h"
-
 #ifdef OS_OSX
-
-#import <Cocoa/Cocoa.h>
-
-static gchar *
-dirs_os_x_get_bundle_resource_dir (void)
-{
-  NSAutoreleasePool *pool;
-  gchar *str = NULL;
-  NSString *path;
-
-  pool = [[NSAutoreleasePool alloc] init];
-
-  if ([[NSBundle mainBundle] bundleIdentifier] == nil)
-    {
-      [pool release];
-      return NULL;
-    }
-
-  path = [[NSBundle mainBundle] resourcePath];
-
-  if (!path)
-    {
-      [pool release];
-      return NULL;
-    }
-
-  str = g_strdup ([path UTF8String]);
-  [pool release];
-  return str;
-}
-
-static gchar *
-dirs_os_x_get_resource_dir (const gchar *subdir,
-                            const gchar *default_dir)
-{
-  gchar *res_dir;
-  gchar *ret;
-
-  res_dir = dirs_os_x_get_bundle_resource_dir ();
-
-  if (res_dir == NULL)
-    {
-      ret = g_build_filename (default_dir, "libpeas-1.0", NULL);
-    }
-  else
-    {
-      ret = g_build_filename (res_dir, subdir, "libpeas-1.0", NULL);
-      g_free (res_dir);
-    }
-
-  return ret;
-}
-
-static gchar *
-dirs_os_x_get_data_dir (void)
-{
-  return dirs_os_x_get_resource_dir ("share", DATADIR);
-}
-
-static gchar *
-dirs_os_x_get_lib_dir (void)
-{
-  return dirs_os_x_get_resource_dir ("lib", LIBDIR);
-}
-
-static gchar *
-dirs_os_x_get_locale_dir (void)
-{
-  gchar *res_dir;
-  gchar *ret;
-
-  res_dir = dirs_os_x_get_bundle_resource_dir ();
-
-  if (res_dir == NULL)
-    {
-      ret = g_build_filename (DATADIR, "locale", NULL);
-    }
-  else
-    {
-      ret = g_build_filename (res_dir, "share", "locale", NULL);
-      g_free (res_dir);
-    }
-
-  return ret;
-}
-
+#include <ige-mac-bundle.h>
 #endif
+
+#include "peas-dirs.h"
 
 gchar *
 peas_dirs_get_data_dir (void)
@@ -127,7 +42,18 @@ peas_dirs_get_data_dir (void)
   data_dir = g_build_filename (win32_dir, "share", "libpeas-1.0", NULL);
   g_free (win32_dir);
 #elif defined (OS_OSX)
-  data_dir = dirs_os_x_get_data_dir ();
+  IgeMacBundle *bundle = ige_mac_bundle_get_default ();
+
+  if (ige_mac_bundle_get_is_app_bundle (bundle))
+    {
+      const gchar *bundle_data_dir = ige_mac_bundle_get_datadir (bundle);
+
+      data_dir = g_build_filename (bundle_data_dir, "libpeas-1.0", NULL);
+    }
+  else
+    {
+      data_dir = g_build_filename (DATADIR, "libpeas-1.0", NULL);
+    }
 #else
   data_dir = g_build_filename (DATADIR, "libpeas-1.0", NULL);
 #endif
@@ -148,7 +74,18 @@ peas_dirs_get_lib_dir (void)
   lib_dir = g_build_filename (win32_dir, "lib", "libpeas-1.0", NULL);
   g_free (win32_dir);
 #elif defined (OS_OSX)
-  lib_dir = dirs_os_x_get_lib_dir ();
+  IgeMacBundle *bundle = ige_mac_bundle_get_default ();
+
+  if (ige_mac_bundle_get_is_app_bundle (bundle))
+    {
+      const gchar *path = ige_mac_bundle_get_resourcesdir (bundle);
+
+      lib_dir = g_build_filename (path, "lib", "libpeas-1.0", NULL);
+    }
+  else
+    {
+      lib_dir = g_build_filename (LIBDIR, "libpeas-1.0", NULL);
+    }
 #else
   lib_dir = g_build_filename (LIBDIR, "libpeas-1.0", NULL);
 #endif
@@ -157,7 +94,7 @@ peas_dirs_get_lib_dir (void)
 }
 
 gchar *
-peas_dirs_get_plugin_loader_dir (const gchar *loader_name)
+peas_dirs_get_plugin_loaders_dir (void)
 {
   const gchar *env_var;
   gchar *lib_dir;
@@ -165,7 +102,7 @@ peas_dirs_get_plugin_loader_dir (const gchar *loader_name)
 
   env_var = g_getenv ("PEAS_PLUGIN_LOADERS_DIR");
   if (env_var != NULL)
-    return g_build_filename (env_var, loader_name, NULL);
+    return g_strdup (env_var);
 
   lib_dir = peas_dirs_get_lib_dir ();
   loader_dir = g_build_filename (lib_dir, "loaders", NULL);
@@ -189,7 +126,16 @@ peas_dirs_get_locale_dir (void)
 
   g_free (win32_dir);
 #elif defined (OS_OSX)
-  locale_dir = dirs_os_x_get_locale_dir ();
+  IgeMacBundle *bundle = ige_mac_bundle_get_default ();
+
+  if (ige_mac_bundle_get_is_app_bundle (bundle))
+    {
+      locale_dir = g_strdup (ige_mac_bundle_get_localedir (bundle));
+    }
+  else
+    {
+      locale_dir = g_build_filename (DATADIR, "locale", NULL);
+    }
 #else
   locale_dir = g_build_filename (DATADIR, "locale", NULL);
 #endif

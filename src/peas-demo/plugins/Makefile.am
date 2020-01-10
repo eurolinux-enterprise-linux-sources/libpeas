@@ -1,9 +1,13 @@
 SUBDIRS = helloworld secondtime
 
-if ENABLE_LUA51
-SUBDIRS += luahello
+if ENABLE_GJS
+SUBDIRS += gjshello
 endif
 
 if ENABLE_PYTHON3
 SUBDIRS += pythonhello
+endif
+
+if ENABLE_SEED
+SUBDIRS += seedhello
 endif

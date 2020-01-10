@@ -1,14 +1,14 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 #
-# Manoj Kumar Giri <mgiri@redhat.com>, 2012, 2014.
+# Manoj Kumar Giri <mgiri@redhat.com>, 2012.
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=libpeas&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2014-09-15 09:43+0000\n"
-"PO-Revision-Date: 2014-09-17 16:48+0530\n"
+"POT-Creation-Date: 2012-11-25 10:22+0000\n"
+"PO-Revision-Date: 2012-12-03 14:40+0530\n"
 "Last-Translator: Manoj Kumar Giri <mgiri@redhat.com>\n"
 "Language-Team: Oriya <oriya-it@googlegroups.com>\n"
 "Language: or\n"
@@ -22,40 +22,39 @@ msgstr ""
 msgid "Plugin Manager"
 msgstr "ପ୍ଲଗ-ଇନ ପରିଚାଳକ"
 
-#. Translators: What PeasGtkPluginManagerView to use
-#: ../data/glade/libpeas-gtk.xml.in.h:3
+#: ../data/glade/libpeas-gtk.xml.in.h:2
 msgid "View"
 msgstr "ଦୃଶ୍ଯ"
 
-#: ../data/glade/libpeas-gtk.xml.in.h:4
+#: ../data/glade/libpeas-gtk.xml.in.h:3
 msgid "Plugin Manager View"
 msgstr "ପ୍ଲଗ-ଇନ ପରିଚାଳକ ଦୃଶ୍ୟ"
 
 #. Translators: Whether builtin plugins should appear in the view (property name)
-#: ../data/glade/libpeas-gtk.xml.in.h:6
+#: ../data/glade/libpeas-gtk.xml.in.h:5
 msgid "Show Builtin"
 msgstr "ସୁନିର୍ମିତ ଦର୍ଶାନ୍ତୁ"
 
-#: ../data/glade/libpeas-gtk.xml.in.h:7
+#: ../data/glade/libpeas-gtk.xml.in.h:6
 msgid "Peas Gtk"
 msgstr "Peas Gtk"
 
-#: ../libpeas/peas-engine.c:856
+#: ../libpeas/peas-engine.c:818
 #, c-format
 msgid "Dependency '%s' was not found"
 msgstr "ନିର୍ଭୋରୋକ '%s' ମିଳିଲା ନାହିଁ"
 
-#: ../libpeas/peas-engine.c:866
+#: ../libpeas/peas-engine.c:828
 #, c-format
 msgid "Dependency '%s' failed to load"
 msgstr "ନିର୍ଭୋରୋକ '%s' ଧାରଣ କରିବାରେ ବିଫଳ"
 
-#: ../libpeas/peas-engine.c:880
+#: ../libpeas/peas-engine.c:843
 #, c-format
 msgid "Plugin loader '%s' was not found"
 msgstr "ପ୍ଲଗଇନ ଧାରଣକର୍ତ୍ତା '%s' ମିଳିଲା ନାହିଁ"
 
-#: ../libpeas/peas-engine.c:892
+#: ../libpeas/peas-engine.c:855
 #, c-format
 msgid "Failed to load"
 msgstr "ଧାରଣ କରିବାରେ ଅସଫଳ"
@@ -87,37 +86,19 @@ msgstr ""
 "'%s' ପ୍ଲଗଇନ '%s' ପ୍ଲଗଇନ ଉପରେ ନିର୍ଭର କରିଥାଏ।\n"
 "ଯଦି ଆପଣ '%s' କୁ ନିଷ୍କ୍ରିୟ କରନ୍ତି, ତେବେ '%s' ମଧ୍ଯ ନିଷ୍କ୍ରିୟ ହୋଇଯିବ।"
 
-#: ../libpeas-gtk/peas-gtk-disable-plugins-dialog.c:181
-msgid "_Cancel"
-msgstr "ବାତିଲ କରନ୍ତୁ (_C)"
-
 #: ../libpeas-gtk/peas-gtk-disable-plugins-dialog.c:183
 msgid "Disable Plugins"
 msgstr "ପ୍ଲଗଇନଗୁଡ଼ିକୁ ନିଷ୍କ୍ରିୟ କରନ୍ତୁ"
 
-#: ../libpeas-gtk/peas-gtk-plugin-manager.c:187
+#: ../libpeas-gtk/peas-gtk-plugin-manager.c:182
 msgid "There was an error displaying the help."
 msgstr "ସହାୟତାକୁ ପ୍ରଦର୍ଶନ କରିବା ସମୟରେ ଗୋଟିଏ ତ୍ରୁଟି ପରିଲିଖିତ ହେଲା।"
 
-#: ../libpeas-gtk/peas-gtk-plugin-manager.c:244
-msgid "_Close"
-msgstr "ବନ୍ଦ କରନ୍ତୁ (_C)"
-
-#: ../libpeas-gtk/peas-gtk-plugin-manager.c:256
-msgid "_Help"
-msgstr "ସହାୟତା (_H)"
-
-#: ../libpeas-gtk/peas-gtk-plugin-manager.c:323
-#| msgid "_Preferences"
-msgid "Pr_eferences"
-msgstr "ପସନ୍ଦ (_e)"
-
-#: ../libpeas-gtk/peas-gtk-plugin-manager.c:328
-#: ../libpeas-gtk/peas-gtk-plugin-manager.c:382
+#: ../libpeas-gtk/peas-gtk-plugin-manager.c:387
 msgid "_About"
 msgstr "ବିବରଣୀ (_A)"
 
-#: ../libpeas-gtk/peas-gtk-plugin-manager.c:390
+#: ../libpeas-gtk/peas-gtk-plugin-manager.c:395
 msgid "_Preferences"
 msgstr "ପସନ୍ଦ (_P)"
 
@@ -133,15 +114,15 @@ msgstr "ସମସ୍ତଙ୍କୁ ସକ୍ରିୟ କରନ୍ତୁ (_n)"
 msgid "_Disable All"
 msgstr "ସମସ୍ତଙ୍କୁ ନିଷ୍କ୍ରିୟ କରନ୍ତୁ (_D)"
 
-#: ../libpeas-gtk/peas-gtk-plugin-manager-view.c:509
+#: ../libpeas-gtk/peas-gtk-plugin-manager-view.c:508
 msgid "Enabled"
 msgstr "ସକ୍ରିୟ"
 
-#: ../libpeas-gtk/peas-gtk-plugin-manager-view.c:530
+#: ../libpeas-gtk/peas-gtk-plugin-manager-view.c:529
 msgid "Plugin"
 msgstr "ପ୍ଲଗଇନ"
 
-#: ../libpeas-gtk/peas-gtk-plugin-manager-view.c:615
+#: ../libpeas-gtk/peas-gtk-plugin-manager-view.c:619
 #, c-format
 msgid ""
 "<b>The plugin '%s' could not be loaded</b>\n"
@@ -150,16 +131,11 @@ msgstr ""
 "<b>ପ୍ଲଗଇନ '%s' କୁ ଧାରଣ କରାଯାଇପାରିଲା ନାହିଁ</b>\n"
 "ଗୋଟିଏ ତ୍ରୁଟି ଦେଖା ଦେଲା: %s"
 
-#. Translators: The directory in which the demo program was compiled at
-#: ../peas-demo/peas-demo.c:41
+#: ../peas-demo/peas-demo.c:40
 msgid "Run from build directory"
 msgstr "ନିର୍ମାଣ ଡିରେକ୍ଟୋରୀରୁ ଚଲାନ୍ତୁ"
 
-#: ../peas-demo/peas-demo.c:83
-msgid "_Quit"
-msgstr "ବିଦାୟ ନିଅନ୍ତୁ (_Q)"
-
-#: ../peas-demo/peas-demo.c:99
+#: ../peas-demo/peas-demo.c:100
 msgid "- libpeas demo application"
 msgstr "- libpeas ପ୍ରଦର୍ଶନ ପ୍ରୟୋଗ"
 

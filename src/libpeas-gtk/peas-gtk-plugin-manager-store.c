@@ -7,19 +7,19 @@
  * Copyright (C) 2007-2009 Paolo Maggi, Paolo Borelli, Steve Frécinaux
  * Copyright (C) 2010 Garrett Regier
  *
- * libpeas is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU Library General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
  *
- * libpeas is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ *  You should have received a copy of the GNU Library General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -46,9 +46,9 @@ static const GType ColumnTypes[] = {
 
 G_STATIC_ASSERT (G_N_ELEMENTS (ColumnTypes) == PEAS_GTK_PLUGIN_MANAGER_STORE_N_COLUMNS);
 
-typedef struct {
+struct _PeasGtkPluginManagerStorePrivate {
   PeasEngine *engine;
-} PeasGtkPluginManagerStorePrivate;
+};
 
 /* Properties */
 enum {
@@ -59,12 +59,7 @@ enum {
 
 static GParamSpec *properties[N_PROPERTIES] = { NULL };
 
-G_DEFINE_TYPE_WITH_PRIVATE (PeasGtkPluginManagerStore,
-                            peas_gtk_plugin_manager_store,
-                            GTK_TYPE_LIST_STORE)
-
-#define GET_PRIV(o) \
-  (peas_gtk_plugin_manager_store_get_instance_private (o))
+G_DEFINE_TYPE (PeasGtkPluginManagerStore, peas_gtk_plugin_manager_store, GTK_TYPE_LIST_STORE);
 
 static void
 update_plugin (PeasGtkPluginManagerStore *store,
@@ -132,7 +127,7 @@ update_plugin (PeasGtkPluginManagerStore *store,
           icon_theme = gtk_icon_theme_get_default ();
           names = g_themed_icon_get_names (G_THEMED_ICON (icon_gicon));
 
-          for (i = 0; !found_icon && names[i] != NULL; ++i)
+          for (i = 0; !found_icon && i < g_strv_length ((gchar **) names); ++i)
             found_icon = gtk_icon_theme_has_icon (icon_theme, names[i]);
 
           if (!found_icon)
@@ -141,7 +136,6 @@ update_plugin (PeasGtkPluginManagerStore *store,
 
               g_clear_object (&icon_gicon);
 
-              G_GNUC_BEGIN_IGNORE_DEPRECATIONS
               if (gtk_stock_lookup (icon_name, &stock_item))
                 {
                   icon_stock_id = icon_name;
@@ -150,7 +144,6 @@ update_plugin (PeasGtkPluginManagerStore *store,
                 {
                   icon_gicon = g_themed_icon_new ("libpeas-plugin");
                 }
-              G_GNUC_END_IGNORE_DEPRECATIONS
             }
         }
 
@@ -168,7 +161,9 @@ update_plugin (PeasGtkPluginManagerStore *store,
     PEAS_GTK_PLUGIN_MANAGER_STORE_PLUGIN_COLUMN,         info,
     -1);
 
-  g_clear_object (&icon_gicon);
+  if (icon_gicon != NULL)
+    g_object_unref (icon_gicon);
+
   g_free (markup);
 }
 
@@ -202,6 +197,10 @@ model_name_sort_func (PeasGtkPluginManagerStore *store,
 static void
 peas_gtk_plugin_manager_store_init (PeasGtkPluginManagerStore *store)
 {
+  store->priv = G_TYPE_INSTANCE_GET_PRIVATE (store,
+                                             PEAS_GTK_TYPE_PLUGIN_MANAGER_STORE,
+                                             PeasGtkPluginManagerStorePrivate);
+
   gtk_list_store_set_column_types (GTK_LIST_STORE (store),
                                    PEAS_GTK_PLUGIN_MANAGER_STORE_N_COLUMNS,
                                    (GType *) ColumnTypes);
@@ -222,12 +221,11 @@ peas_gtk_plugin_manager_store_set_property (GObject      *object,
                                             GParamSpec   *pspec)
 {
   PeasGtkPluginManagerStore *store = PEAS_GTK_PLUGIN_MANAGER_STORE (object);
-  PeasGtkPluginManagerStorePrivate *priv = GET_PRIV (store);
 
   switch (prop_id)
     {
     case PROP_ENGINE:
-      priv->engine = g_value_get_object (value);
+      store->priv->engine = g_value_get_object (value);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -242,12 +240,11 @@ peas_gtk_plugin_manager_store_get_property (GObject    *object,
                                             GParamSpec *pspec)
 {
   PeasGtkPluginManagerStore *store = PEAS_GTK_PLUGIN_MANAGER_STORE (object);
-  PeasGtkPluginManagerStorePrivate *priv = GET_PRIV (store);
 
   switch (prop_id)
     {
     case PROP_ENGINE:
-      g_value_set_object (value, priv->engine);
+      g_value_set_object (value, store->priv->engine);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -259,23 +256,20 @@ static void
 peas_gtk_plugin_manager_store_constructed (GObject *object)
 {
   PeasGtkPluginManagerStore *store = PEAS_GTK_PLUGIN_MANAGER_STORE (object);
-  PeasGtkPluginManagerStorePrivate *priv = GET_PRIV (store);
 
-  if (priv->engine == NULL)
-    priv->engine = peas_engine_get_default ();
+  if (store->priv->engine == NULL)
+    store->priv->engine = peas_engine_get_default ();
 
-  g_object_ref (priv->engine);
+  g_object_ref (store->priv->engine);
 
-  g_signal_connect_object (priv->engine,
-                           "load-plugin",
-                           G_CALLBACK (plugin_loaded_toggled_cb),
-                           store,
-                           G_CONNECT_AFTER);
-  g_signal_connect_object (priv->engine,
-                           "unload-plugin",
-                           G_CALLBACK (plugin_loaded_toggled_cb),
-                           store,
-                           G_CONNECT_AFTER);
+  g_signal_connect_after (store->priv->engine,
+                          "load-plugin",
+                          G_CALLBACK (plugin_loaded_toggled_cb),
+                          store);
+  g_signal_connect_after (store->priv->engine,
+                          "unload-plugin",
+                          G_CALLBACK (plugin_loaded_toggled_cb),
+                          store);
 
   peas_gtk_plugin_manager_store_reload (store);
 
@@ -286,9 +280,14 @@ static void
 peas_gtk_plugin_manager_store_dispose (GObject *object)
 {
   PeasGtkPluginManagerStore *store = PEAS_GTK_PLUGIN_MANAGER_STORE (object);
-  PeasGtkPluginManagerStorePrivate *priv = GET_PRIV (store);
 
-  g_clear_object (&priv->engine);
+  if (store->priv->engine != NULL)
+    {
+      g_signal_handlers_disconnect_by_func (store->priv->engine,
+                                            plugin_loaded_toggled_cb,
+                                            store);
+      g_clear_object (&store->priv->engine);
+    }
 
   G_OBJECT_CLASS (peas_gtk_plugin_manager_store_parent_class)->dispose (object);
 }
@@ -318,6 +317,7 @@ peas_gtk_plugin_manager_store_class_init (PeasGtkPluginManagerStoreClass *klass)
                          G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, N_PROPERTIES, properties);
+  g_type_class_add_private (object_class, sizeof (PeasGtkPluginManagerStorePrivate));
 }
 
 /*
@@ -349,7 +349,6 @@ peas_gtk_plugin_manager_store_new (PeasEngine *engine)
 void
 peas_gtk_plugin_manager_store_reload (PeasGtkPluginManagerStore *store)
 {
-  PeasGtkPluginManagerStorePrivate *priv = GET_PRIV (store);
   GtkListStore *list_store;
   const GList *plugins;
   GtkTreeIter iter;
@@ -360,7 +359,7 @@ peas_gtk_plugin_manager_store_reload (PeasGtkPluginManagerStore *store)
 
   gtk_list_store_clear (list_store);
 
-  plugins = peas_engine_get_plugin_list (priv->engine);
+  plugins = peas_engine_get_plugin_list (store->priv->engine);
 
   while (plugins != NULL)
     {
@@ -391,8 +390,8 @@ peas_gtk_plugin_manager_store_set_enabled (PeasGtkPluginManagerStore *store,
                                            GtkTreeIter               *iter,
                                            gboolean                   enabled)
 {
-  PeasGtkPluginManagerStorePrivate *priv = GET_PRIV (store);
   PeasPluginInfo *info;
+  gboolean success = TRUE;
 
   g_return_if_fail (PEAS_GTK_IS_PLUGIN_MANAGER_STORE (store));
   g_return_if_fail (iter != NULL);
@@ -403,16 +402,19 @@ peas_gtk_plugin_manager_store_set_enabled (PeasGtkPluginManagerStore *store,
 
   if (enabled)
     {
-      peas_engine_load_plugin (priv->engine, info);
+      /* load the plugin */
+      if (!peas_engine_load_plugin (store->priv->engine, info))
+        success = FALSE;
     }
   else
     {
-      peas_engine_unload_plugin (priv->engine, info);
+      /* unload the plugin */
+      if (!peas_engine_unload_plugin (store->priv->engine, info))
+        success = FALSE;
     }
 
-  /* Don't need to manually update the plugin as
-   * PeasEngine::{load,unload}-plugin are connected to
-   */
+  if (success)
+    update_plugin (store, iter, info);
 }
 
 /*

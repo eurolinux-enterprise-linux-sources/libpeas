@@ -2,12 +2,12 @@ SUBDIRS=plugins
 
 bin_PROGRAMS = peas-demo
 
-AM_CPPFLAGS = \
-	-I$(top_srcdir)		\
-	-I$(srcdir)		\
-	$(PEAS_CFLAGS)		\
-	$(PEAS_GTK_CFLAGS)	\
-	$(WARN_CFLAGS)		\
+INCLUDES =								\
+	-I$(top_srcdir)							\
+	-I$(srcdir)							\
+	$(PEAS_CFLAGS)							\
+	$(PEAS_GTK_CFLAGS)						\
+	$(WARN_CFLAGS)							\
 	$(DISABLE_DEPRECATED)
 
 peas_demo_SOURCES = \
@@ -22,11 +22,10 @@ peas_demo_LDADD = \
 	$(PEAS_GTK_LIBS)
 
 peas_demo_CFLAGS = \
-	$(PEAS_CFLAGS)					\
-	-DPEAS_LIBDIR="\"$(libdir)\""			\
-	-DPEAS_PREFIX="\"$(prefix)\""			\
-	-DPEAS_BUILDDIR="\"$(abs_top_builddir)\""
+	$(PEAS_CFLAGS)			\
+	-DPEAS_LIBDIR="\"$(libdir)\""	\
+	-DPEAS_PREFIX="\"$(prefix)\""
 
 .PHONY: demo
 demo: $(bin_PROGRAMS)
-	@./peas-demo --run-from-build-dir
+	./peas-demo --run-from-build-dir

@@ -4,19 +4,19 @@
  *
  * Copyright (C) 2010 Steve Frécinaux
  *
- * libpeas is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU Library General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
  *
- * libpeas is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ *  You should have received a copy of the GNU Library General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -24,6 +24,7 @@
 #endif
 
 #include "peas-extension.h"
+#include "peas-extension-wrapper.h"
 #include "peas-introspection.h"
 
 /**
@@ -37,8 +38,8 @@
  * loaded plugins.
  *
  * To properly use the proxy instances, you will need GObject-introspection
- * data for the #GType you want to use as an extension point.
- * For instance, if you wish to use #PeasActivatable, you will need to
+ * data for the #GInterface or #GObjectClass you want to use as an extension
+ * point.  For instance, if you wish to use #PeasActivatable, you will need to
  * put the following code excerpt in the engine initialization code, in order
  * to load the required "Peas" typelib:
  *
@@ -47,7 +48,7 @@
  *                        "Peas", "1.0", 0, NULL);
  * ]|
  *
- * You should proceed the same way for any namespace which provides types
+ * You should proceed the same way for any namespace which provides interfaces
  * you want to use as extension points. GObject-introspection data is required
  * for all the supported languages, even for C.
  *
@@ -66,18 +67,16 @@ peas_extension_get_type (void)
   return G_TYPE_OBJECT;
 }
 
-static
-G_DEFINE_QUARK (peas-extension-type, extension_type)
-
 static GICallableInfo *
 get_method_info (PeasExtension *exten,
                  const gchar   *method_name,
-                 GType         *gtype)
+                 GType         *interface)
 {
   guint i;
   GType exten_type;
   GType *interfaces;
   GICallableInfo *method_info;
+  gboolean must_free_interfaces = FALSE;
 
   /* Must prioritize the initial GType */
   exten_type = peas_extension_get_extension_type (exten);
@@ -85,13 +84,21 @@ get_method_info (PeasExtension *exten,
 
   if (method_info != NULL)
     {
-      if (gtype != NULL)
-        *gtype = exten_type;
+      if (interface != NULL)
+        *interface = exten_type;
 
       return method_info;
     }
 
-  interfaces = g_type_interfaces (G_TYPE_FROM_INSTANCE (exten), NULL);
+  if (PEAS_IS_EXTENSION_WRAPPER (exten))
+    {
+      interfaces = PEAS_EXTENSION_WRAPPER (exten)->interfaces;
+    }
+  else
+    {
+      must_free_interfaces = TRUE;
+      interfaces = g_type_interfaces (G_TYPE_FROM_INSTANCE (exten), NULL);
+    }
 
   for (i = 0; interfaces[i] != G_TYPE_INVALID; ++i)
     {
@@ -99,17 +106,19 @@ get_method_info (PeasExtension *exten,
 
       if (method_info != NULL)
         {
-          if (gtype != NULL)
-            *gtype = interfaces[i];
+          if (interface != NULL)
+            *interface = interfaces[i];
 
           break;
         }
     }
 
-  if (method_info == NULL)
-    g_warning ("Could not find the GType for method '%s'", method_name);
+  if (must_free_interfaces)
+    g_free (interfaces);
 
-  g_free (interfaces);
+  if (method_info == NULL)
+    g_warning ("Could not find the interface for method '%s'", method_name);
+
   return method_info;
 }
 
@@ -117,7 +126,7 @@ get_method_info (PeasExtension *exten,
  * peas_extension_get_extension_type:
  * @exten: A #PeasExtension.
  *
- * Get the #GType of the extension proxied by @exten.
+ * Get the type of the extension interface of the object proxied by @exten.
  *
  * Return value: The #GType proxied by @exten.
  *
@@ -126,8 +135,14 @@ get_method_info (PeasExtension *exten,
 GType
 peas_extension_get_extension_type (PeasExtension *exten)
 {
-  return GPOINTER_TO_SIZE (g_object_get_qdata (G_OBJECT (exten),
-                                               extension_type_quark ()));
+  if (PEAS_IS_EXTENSION_WRAPPER (exten))
+    {
+      return peas_extension_wrapper_get_extension_type (PEAS_EXTENSION_WRAPPER (exten));
+    }
+  else
+    {
+      return (GType) g_object_get_data (G_OBJECT (exten), "peas-extension-type");
+    }
 }
 
 /**
@@ -154,7 +169,7 @@ peas_extension_get_extension_type (PeasExtension *exten)
  *
  * Return value: %TRUE on successful call.
  *
- * Deprecated: 1.2: Use the object directly instead.
+ * Deprecated: 1.2: Use the dynamically implemented interface instead.
  */
 gboolean
 peas_extension_call (PeasExtension *exten,
@@ -186,7 +201,7 @@ peas_extension_call (PeasExtension *exten,
  *
  * Return value: %TRUE on successful call.
  *
- * Deprecated: 1.2: Use the object directly instead.
+ * Deprecated: 1.2: Use the dynamically implemented interface instead.
  */
 gboolean
 peas_extension_call_valist (PeasExtension *exten,
@@ -241,7 +256,7 @@ peas_extension_call_valist (PeasExtension *exten,
  *
  * Return value: %TRUE on successful call.
  *
- * Deprecated: 1.2: Use the object directly instead.
+ * Deprecated: 1.2: Use the dynamically implemented interface instead.
  */
 gboolean
 peas_extension_callv (PeasExtension *exten,
@@ -250,20 +265,29 @@ peas_extension_callv (PeasExtension *exten,
                       GIArgument    *return_value)
 {
   GICallableInfo *method_info;
-  GType gtype;
+  GType interface;
   gboolean success;
 
   g_return_val_if_fail (PEAS_IS_EXTENSION (exten), FALSE);
   g_return_val_if_fail (method_name != NULL, FALSE);
 
-  method_info = get_method_info (exten, method_name, &gtype);
+  method_info = get_method_info (exten, method_name, &interface);
 
   /* Already warned */
   if (method_info == NULL)
     return FALSE;
 
-  success = peas_gi_method_call (G_OBJECT (exten), method_info, gtype,
-                                 method_name, args, return_value);
+  if (PEAS_IS_EXTENSION_WRAPPER (exten))
+    {
+      success = peas_extension_wrapper_callv (PEAS_EXTENSION_WRAPPER (exten),
+                                              interface, method_info,
+                                              method_name, args, return_value);
+    }
+  else
+    {
+      success = peas_gi_method_call (G_OBJECT (exten), method_info, interface,
+                                     method_name, args, return_value);
+    }
 
   g_base_info_unref (method_info);
   return success;

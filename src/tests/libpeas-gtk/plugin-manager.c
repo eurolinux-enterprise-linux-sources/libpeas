@@ -4,19 +4,19 @@
  *
  * Copyright (C) 2010 - Garrett Regier
  *
- * libpeas is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU Library General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
  *
- * libpeas is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ *  You should have received a copy of the GNU Library General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -26,7 +26,6 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 #include <libpeas/peas.h>
-#include <libpeas/peas-i18n.h>
 #include <libpeas-gtk/peas-gtk.h>
 
 #include "testing/testing.h"
@@ -36,6 +35,7 @@ typedef struct _TestFixture TestFixture;
 struct _TestFixture {
   PeasEngine *engine;
   GtkWidget *window;
+  GtkWindowGroup *window_group;
   PeasGtkPluginManager *manager;
   PeasGtkPluginManagerView *view;
   GtkTreeSelection *selection;
@@ -53,14 +53,37 @@ notify_model_cb (GtkTreeView *view,
 }
 
 static void
+plugin_manager_forall_cb (GtkWidget  *widget,
+                          GtkWidget **toolbar)
+{
+  if (GTK_IS_TOOLBAR (widget))
+    *toolbar = widget;
+}
+
+static void
 test_setup (TestFixture   *fixture,
             gconstpointer  data)
 {
+  GList *children;
+  GtkContainer *toolbar = NULL;
+  GtkContainer *tool_item;
+  GtkContainer *toolbar_box;
+  GtkContainer *item_box1;
+  GtkContainer *item_box2;
+
   fixture->engine = testing_engine_new ();
   fixture->window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  fixture->window_group = gtk_window_group_new ();
   fixture->manager = PEAS_GTK_PLUGIN_MANAGER (peas_gtk_plugin_manager_new (NULL));
   fixture->view = PEAS_GTK_PLUGIN_MANAGER_VIEW (peas_gtk_plugin_manager_get_view (fixture->manager));
   fixture->selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (fixture->view));
+
+  /* gtk_window_set_transient_for() will not add to the
+   * window group unless one has already been created and
+   * find_window_by_title() will need need it to be in the group
+   */
+  gtk_window_group_add_window (fixture->window_group,
+                               GTK_WINDOW (fixture->window));
 
   gtk_container_add (GTK_CONTAINER (fixture->window),
                      GTK_WIDGET (fixture->manager));
@@ -73,15 +96,59 @@ test_setup (TestFixture   *fixture,
   /* Set the model */
   g_object_notify (G_OBJECT (fixture->view), "model");
 
-  fixture->about_button = gtk_test_find_widget (fixture->window,
-                                                _("About"),
-                                                GTK_TYPE_BUTTON);
-  g_assert (GTK_IS_BUTTON (fixture->about_button));
+  /* Must use forall as the buttons are "internal" children */
+  gtk_container_forall (GTK_CONTAINER (fixture->manager),
+                        (GtkCallback) plugin_manager_forall_cb,
+                        &toolbar);
 
-  fixture->configure_button = gtk_test_find_widget (fixture->window,
-                                                    _("Preferences"),
-                                                    GTK_TYPE_BUTTON);
+  g_assert (toolbar != NULL);
+
+  /* The structure for the toolbar is:
+     toolbar
+       toolitem
+         box
+           box
+             button
+           box
+             button
+  */
+
+  children = gtk_container_get_children (toolbar);
+  g_assert (g_list_length (children) == 1);
+
+  tool_item = children->data;
+  g_assert (GTK_IS_TOOL_ITEM (tool_item));
+  g_list_free (children);
+
+  children = gtk_container_get_children (tool_item);
+  g_assert (g_list_length (children) == 1);
+
+  toolbar_box = children->data;
+  g_assert (GTK_IS_BOX (toolbar_box));
+  g_list_free (children);
+
+  children = gtk_container_get_children (toolbar_box);
+  g_assert (g_list_length (children) == 2);
+
+  item_box1 = children->data;
+  item_box2 = children->next->data;
+  g_assert (GTK_IS_BOX (item_box1));
+  g_assert (GTK_IS_BOX (item_box2));
+  g_list_free (children);
+
+  children = gtk_container_get_children (item_box1);
+  g_assert (g_list_length (children) == 1);
+
+  fixture->configure_button = GTK_WIDGET (children->data);
   g_assert (GTK_IS_BUTTON (fixture->configure_button));
+  g_list_free (children);
+
+  children = gtk_container_get_children (item_box2);
+  g_assert (g_list_length (children) == 1);
+
+  fixture->about_button = GTK_WIDGET (children->data);
+  g_assert (GTK_IS_BUTTON (fixture->about_button));
+  g_list_free (children);
 }
 
 static void
@@ -89,6 +156,7 @@ test_teardown (TestFixture   *fixture,
                gconstpointer  data)
 {
   gtk_widget_destroy (GTK_WIDGET (fixture->window));
+  g_object_unref (fixture->window_group);
 
   testing_engine_free (fixture->engine);
 }
@@ -295,6 +363,7 @@ test_gtk_plugin_manager_configure_dialog (TestFixture *fixture)
   GList *list_it;
   GtkWidget *content;
   GtkWidget *label = NULL;
+  GtkWidget *button_box;
   GtkWidget *close_button = NULL;
   GtkWidget *help_button = NULL;
 
@@ -330,13 +399,26 @@ test_gtk_plugin_manager_configure_dialog (TestFixture *fixture)
   g_list_free (list);
 
 
-  close_button = gtk_dialog_get_widget_for_response (GTK_DIALOG (window),
-                                                     GTK_RESPONSE_CLOSE);
-  g_assert (close_button != NULL);
+  button_box = gtk_dialog_get_action_area (GTK_DIALOG (window));
+  list = gtk_container_get_children (GTK_CONTAINER (button_box));
 
-  help_button = gtk_dialog_get_widget_for_response (GTK_DIALOG (window),
-                                                    GTK_RESPONSE_HELP);
+  for (list_it = list; list_it != NULL; list_it = list_it->next)
+    {
+      if (GTK_IS_BUTTON (list_it->data))
+        {
+          const gchar *text = gtk_button_get_label (GTK_BUTTON (list_it->data));
+
+          if (g_strcmp0 (text, GTK_STOCK_CLOSE) == 0)
+            close_button = GTK_WIDGET (list_it->data);
+          else if (g_strcmp0 (text, GTK_STOCK_HELP) == 0)
+            help_button = GTK_WIDGET (list_it->data);
+        }
+    }
+
+  g_assert (close_button != NULL);
   g_assert (help_button != NULL);
+
+  g_list_free (list);
 
   gtk_widget_destroy (window);
 }

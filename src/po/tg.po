@@ -9,10 +9,10 @@ msgstr ""
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=libpeas&keywords=I18N+L10N&component=general\n"
 "POT-Creation-Date: 2013-02-14 12:02+0000\n"
-"PO-Revision-Date: 2013-06-05 14:23+0500\n"
+"PO-Revision-Date: 2013-01-21 14:04+0500\n"
 "Last-Translator: Victor Ibragimov <victor.ibragimov@gmail.com>\n"
 "Language-Team: \n"
-"Language: tg\n"
+"Language: Tajik\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -28,46 +28,45 @@ msgstr "Намоиш"
 
 #: ../data/glade/libpeas-gtk.xml.in.h:3
 msgid "Plugin Manager View"
-msgstr "Намуди мудири плагинҳо"
+msgstr ""
 
 #. Translators: Whether builtin plugins should appear in the view (property name)
 #: ../data/glade/libpeas-gtk.xml.in.h:5
 msgid "Show Builtin"
-msgstr "Намоиши дарунсохт"
+msgstr ""
 
 #: ../data/glade/libpeas-gtk.xml.in.h:6
 msgid "Peas Gtk"
-msgstr "Нахӯди Gtk"
+msgstr ""
 
 #: ../libpeas/peas-engine.c:818
 #, c-format
 msgid "Dependency '%s' was not found"
-msgstr "Вобастагии '%s' ёфт нашуд"
+msgstr ""
 
 #: ../libpeas/peas-engine.c:828
 #, c-format
 msgid "Dependency '%s' failed to load"
-msgstr "Боргирии вобастагии '%s' қатъ шудааст"
+msgstr ""
 
 #: ../libpeas/peas-engine.c:843
 #, c-format
 msgid "Plugin loader '%s' was not found"
-msgstr "Боркунандаи плагини '%s' ёфт нашуд"
+msgstr ""
 
 #: ../libpeas/peas-engine.c:855
 #, c-format
 msgid "Failed to load"
-msgstr "Боркунӣ қатъ шуд"
+msgstr ""
 
 #: ../libpeas-gtk/peas-gtk-disable-plugins-dialog.c:91
 msgid "Additional plugins must be disabled"
-msgstr "Плагинҳои иловагӣ бояд ғайрифаъол карда шаванд"
+msgstr ""
 
 #: ../libpeas-gtk/peas-gtk-disable-plugins-dialog.c:98
 #, c-format
 msgid "The following plugins depend on '%s' and will also be disabled:"
 msgstr ""
-"Плагинҳои зерин аз '%s' вобаста ҳастанд ва инчунин ғайрифаъол карда мешаванд:"
 
 #: ../libpeas-gtk/peas-gtk-disable-plugins-dialog.c:140
 msgid "Plugins"
@@ -75,7 +74,7 @@ msgstr "Плагинҳо"
 
 #: ../libpeas-gtk/peas-gtk-disable-plugins-dialog.c:156
 msgid "An additional plugin must be disabled"
-msgstr "Плагини иловагӣ бояд ғайрифаъол карда шавад"
+msgstr ""
 
 #: ../libpeas-gtk/peas-gtk-disable-plugins-dialog.c:163
 #, c-format
@@ -83,16 +82,14 @@ msgid ""
 "The '%s' plugin depends on the '%s' plugin.\n"
 "If you disable '%s', '%s' will also be disabled."
 msgstr ""
-"Плагини '%s' аз плагини '%s' вобаста аст.\n"
-"Агар шумо '%s'-ро ғайрифаъол кунед, '%s' инчунин ғайрифаъол мешавад."
 
 #: ../libpeas-gtk/peas-gtk-disable-plugins-dialog.c:183
 msgid "Disable Plugins"
-msgstr "Ғайрифаъол кардани плагинҳо"
+msgstr ""
 
 #: ../libpeas-gtk/peas-gtk-plugin-manager.c:182
 msgid "There was an error displaying the help."
-msgstr "Ҳангоми намоиши кӯмак хатогӣ ба вуҷуд омад."
+msgstr ""
 
 #: ../libpeas-gtk/peas-gtk-plugin-manager.c:387
 msgid "_About"
@@ -108,11 +105,11 @@ msgstr "_Фаъол"
 
 #: ../libpeas-gtk/peas-gtk-plugin-manager-view.c:345
 msgid "E_nable All"
-msgstr "_Фаъол кардани плагинҳо"
+msgstr ""
 
 #: ../libpeas-gtk/peas-gtk-plugin-manager-view.c:349
 msgid "_Disable All"
-msgstr "_Ғайрифаъол кардани ҳама"
+msgstr ""
 
 #: ../libpeas-gtk/peas-gtk-plugin-manager-view.c:510
 msgid "Enabled"
@@ -128,13 +125,11 @@ msgid ""
 "<b>The plugin '%s' could not be loaded</b>\n"
 "An error occurred: %s"
 msgstr ""
-"<b>Плагини '%s' бор намешавад</b>\n"
-"Хатогие ба вуҷуд омад: %s"
 
 #: ../peas-demo/peas-demo.c:40
 msgid "Run from build directory"
-msgstr "Иҷро кардан аз директорияи сохт"
+msgstr ""
 
 #: ../peas-demo/peas-demo.c:100
 msgid "- libpeas demo application"
-msgstr "- барномаи намоишии libpeas"
+msgstr ""

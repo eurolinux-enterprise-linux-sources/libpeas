@@ -1,6 +1,6 @@
 include $(top_srcdir)/tests/Makefile.plugin
 
-AM_CPPFLAGS = \
+INCLUDES = \
 	-I$(top_srcdir)		\
 	$(PEAS_CFLAGS)		\
 	$(WARN_CFLAGS)		\
@@ -13,9 +13,7 @@ libbuiltin_la_SOURCES = \
 	builtin-plugin.h
 
 libbuiltin_la_LDFLAGS = $(TEST_PLUGIN_LIBTOOL_FLAGS)
-libbuiltin_la_LIBADD  = \
-	$(top_builddir)/libpeas/libpeas-1.0.la	\
-	$(PEAS_LIBS)
+libbuiltin_la_LIBADD  = $(PEAS_LIBS)
 
 noinst_PLUGIN = builtin.plugin
 

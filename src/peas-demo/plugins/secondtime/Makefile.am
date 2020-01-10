@@ -1,6 +1,6 @@
 plugindir = $(libdir)/peas-demo/plugins/secondtime
 
-AM_CPPFLAGS = \
+INCLUDES = \
 	-I$(top_srcdir) 	\
 	$(PEAS_CFLAGS)		\
 	$(PEAS_GTK_CFLAGS)
@@ -12,10 +12,7 @@ libsecondtime_la_SOURCES = \
 	second-time.c
 
 libsecondtime_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS)
-libsecondtime_la_LIBADD  = \
-	$(top_builddir)/libpeas/libpeas-1.0.la	\
-	$(PEAS_LIBS) 				\
-	$(PEAS_GTK_LIBS)
+libsecondtime_la_LIBADD  = $(PEAS_LIBS) $(PEAS_GTK_LIBS)
 
 plugin_DATA = secondtime.plugin
 

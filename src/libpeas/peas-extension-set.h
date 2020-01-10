@@ -4,19 +4,19 @@
  *
  * Copyright (C) 2010 - Steve Frécinaux
  *
- * libpeas is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU Library General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
  *
- * libpeas is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ *  You should have received a copy of the GNU Library General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
 #ifndef __PEAS_EXTENSION_SET_H__
@@ -112,8 +112,7 @@ typedef void (*PeasExtensionSetForeachFunc) (PeasExtensionSet *set,
  */
 GType              peas_extension_set_get_type    (void)  G_GNUC_CONST;
 
-#ifndef __GI_SCANNER__
-#ifndef PEAS_DISABLE_DEPRECATED
+#if !defined(PEAS_DISABLE_DEPRECATED) && !defined(__GI_SCANNER__)
 gboolean           peas_extension_set_call        (PeasExtensionSet *set,
                                                    const gchar      *method_name,
                                                    ...);
@@ -123,7 +122,6 @@ gboolean           peas_extension_set_call_valist (PeasExtensionSet *set,
 gboolean           peas_extension_set_callv       (PeasExtensionSet *set,
                                                    const gchar      *method_name,
                                                    GIArgument       *args);
-#endif
 #endif
 
 void               peas_extension_set_foreach     (PeasExtensionSet *set,

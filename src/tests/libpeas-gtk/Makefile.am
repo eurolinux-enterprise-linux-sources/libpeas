@@ -5,7 +5,7 @@ SUBDIRS = plugins testing
 run-test-hook:
 	@test -n "$(DISPLAY)"
 
-AM_CPPFLAGS = \
+INCLUDES = \
 	-I$(top_srcdir)			\
 	-I$(srcdir)			\
 	-I$(srcdir)/../testing-util	\

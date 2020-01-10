@@ -1,6 +1,6 @@
 noinst_LTLIBRARIES = libintrospection-1.0.la
 
-AM_CPPFLAGS = \
+INCLUDES = \
 	-I$(top_srcdir)		\
 	-I$(srcdir)		\
 	$(PEAS_CFLAGS)		\
@@ -13,17 +13,19 @@ libintrospection_1_0_la_LIBADD = \
 	$(top_builddir)/libpeas/libpeas-1.0.la
 
 libintrospection_1_0_la_SOURCES = \
-	introspection-abstract.c		\
-	introspection-abstract.h		\
-	introspection-base.c			\
-	introspection-base.h			\
-	introspection-callable.c		\
-	introspection-callable.h		\
-	introspection-has-prerequisite.c	\
-	introspection-has-prerequisite.h	\
-	introspection-prerequisite.c	        \
-	introspection-prerequisite.h	        \
-	introspection-unimplemented.c		\
+	introspection-base.c				\
+	introspection-base.h				\
+	introspection-callable.c			\
+	introspection-callable.h			\
+	introspection-has-missing-prerequisite.c	\
+	introspection-has-missing-prerequisite.h	\
+	introspection-has-prerequisite.c		\
+	introspection-has-prerequisite.h		\
+	introspection-properties.c			\
+	introspection-properties.h			\
+	introspection-properties-prerequisite.c		\
+	introspection-properties-prerequisite.h		\
+	introspection-unimplemented.c			\
 	introspection-unimplemented.h
 
 -include $(INTROSPECTION_MAKEFILE)

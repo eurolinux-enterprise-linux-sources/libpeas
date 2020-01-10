@@ -4,19 +4,19 @@
  *
  * Copyright (C) 2010 - Garrett Regier
  *
- * libpeas is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU Library General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
  *
- * libpeas is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ *  You should have received a copy of the GNU Library General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -63,7 +63,6 @@ test_engine_new (PeasEngine *engine)
 {
   PeasEngine *new_engine;
 
-  /* Only one testing engine can be alive */
   new_engine = peas_engine_new ();
 
   g_assert (engine != NULL);
@@ -99,12 +98,7 @@ test_engine_get_default (void)
 
   g_assert (peas_engine_get_default () == peas_engine_get_default ());
 
-  /* Only has a single ref */
-  test_engine = peas_engine_get_default ();
-  g_object_add_weak_pointer (G_OBJECT (test_engine),
-                             (gpointer *) &test_engine);
-  g_object_unref (test_engine);
-  g_assert (test_engine == NULL);
+  g_object_unref (peas_engine_get_default ());
 
 
   /* Check that the default engine is the newly created engine
@@ -248,7 +242,8 @@ test_engine_not_loadable_plugin (PeasEngine *engine)
   GError *error = NULL;
   PeasPluginInfo *info;
 
-  testing_util_push_log_hook ("Failed to load module 'not-loadable'*");
+  testing_util_push_log_hook ("*libnot-loadable.so: cannot open shared "
+                              "object file: No such file or directory");
   testing_util_push_log_hook ("Error loading plugin 'not-loadable'");
 
   info = peas_engine_get_plugin_info (engine, "not-loadable");
@@ -260,39 +255,6 @@ test_engine_not_loadable_plugin (PeasEngine *engine)
                   PEAS_PLUGIN_INFO_ERROR_LOADING_FAILED);
 
   g_error_free (error);
-}
-
-static void
-test_engine_plugin_list (PeasEngine *engine)
-{
-  GList *plugin_list;
-  const gchar **dependencies;
-  gint builtin_index, loadable_index, two_deps_index;
-  PeasPluginInfo *builtin_info, *loadable_info, *two_deps_info;
-
-  plugin_list = (GList *) peas_engine_get_plugin_list (engine);
-
-  builtin_info = peas_engine_get_plugin_info (engine, "builtin");
-  loadable_info = peas_engine_get_plugin_info (engine, "loadable");
-  two_deps_info = peas_engine_get_plugin_info (engine, "two-deps");
-
-  builtin_index = g_list_index (plugin_list, builtin_info);
-  loadable_index = g_list_index (plugin_list, loadable_info);
-  two_deps_index = g_list_index (plugin_list, two_deps_info);
-
-  g_assert_cmpint (builtin_index, !=, -1);
-  g_assert_cmpint (loadable_index, !=, -1);
-  g_assert_cmpint (two_deps_index, !=, -1);
-
-  /* Verify that we are finding the furthest dependency in the list */
-  dependencies = peas_plugin_info_get_dependencies (two_deps_info);
-  g_assert_cmpint (builtin_index, >, loadable_index);
-  g_assert_cmpstr (dependencies[0], ==, "loadable");
-  g_assert_cmpstr (dependencies[1], ==, "builtin");
-
-  /* The two-deps plugin should be ordered after builtin and loadable */
-  g_assert_cmpint (builtin_index, <, two_deps_index);
-  g_assert_cmpint (loadable_index, <, two_deps_index);
 }
 
 static void
@@ -413,12 +375,43 @@ test_engine_loaded_plugins (PeasEngine *engine)
 }
 
 static void
-test_engine_enable_unkown_loader (PeasEngine *engine)
+test_engine_nonexistent_loader (PeasEngine *engine)
 {
-  testing_util_push_log_hook ("Failed to enable unknown "
-                              "plugin loader 'does-not-exist'");
+  GError *error = NULL;
+  PeasPluginInfo *info;
 
+  testing_util_push_log_hook ("Could not load plugin loader 'does-not-exist'*");
+  testing_util_push_log_hook ("Could not find loader 'does-not-exist' for*");
+
+  info = peas_engine_get_plugin_info (engine, "nonexistent-loader");
   peas_engine_enable_loader (engine, "does-not-exist");
+
+  g_assert (!peas_engine_load_plugin (engine, info));
+  g_assert (!peas_plugin_info_is_loaded (info));
+  g_assert (!peas_plugin_info_is_available (info, &error));
+  g_assert_error (error, PEAS_PLUGIN_INFO_ERROR,
+                  PEAS_PLUGIN_INFO_ERROR_LOADER_NOT_FOUND);
+
+  g_error_free (error);
+}
+
+static void
+test_engine_disabled_loader (PeasEngine *engine)
+{
+  PeasPluginInfo *info;
+  GError *error = NULL;
+
+  testing_util_push_log_hook ("Could not find loader 'disabled'*");
+
+  info = peas_engine_get_plugin_info (engine, "disabled-loader");
+
+  g_assert (!peas_engine_load_plugin (engine, info));
+  g_assert (!peas_plugin_info_is_loaded (info));
+  g_assert (!peas_plugin_info_is_available (info, &error));
+  g_assert_error (error, PEAS_PLUGIN_INFO_ERROR,
+                  PEAS_PLUGIN_INFO_ERROR_LOADER_NOT_FOUND);
+
+  g_error_free (error);
 }
 
 static void
@@ -434,27 +427,23 @@ test_engine_nonexistent_search_path (PeasEngine *engine)
   peas_engine_add_search_path (engine, "/nowhere", NULL);
 }
 
+
 static void
 test_engine_shutdown (void)
 {
-  g_test_trap_subprocess ("/engine/shutdown/subprocess", 0, 0);
+  /* Should be able to shutdown multiple times */
+  peas_engine_shutdown ();
+  peas_engine_shutdown ();
+
+  /* Cannot create an engine because libpeas has been shutdown */
+  if (g_test_trap_fork (0, G_TEST_TRAP_SILENCE_STDOUT | G_TEST_TRAP_SILENCE_STDERR))
+    {
+      peas_engine_new ();
+      exit (0);
+    }
   g_test_trap_assert_failed ();
   g_test_trap_assert_stderr ("*libpeas cannot create a plugin "
                               "engine as it has been shutdown*");
-}
-
-static void
-test_engine_shutdown_subprocess (PeasEngine *engine)
-{
-    testing_engine_free (engine);
-
-    /* Should be able to shutdown multiple times */
-    peas_engine_shutdown ();
-    peas_engine_shutdown ();
-
-    /* Cannot create an engine because libpeas has been shutdown */
-    engine = peas_engine_new ();
-    g_assert (engine == NULL);
 }
 
 int
@@ -487,16 +476,16 @@ main (int    argc,
   TEST ("unavailable-plugin", unavailable_plugin);
   TEST ("not-loadable-plugin", not_loadable_plugin);
 
-  TEST ("plugin-list", plugin_list);
   TEST ("loaded-plugins", loaded_plugins);
 
-  TEST ("enable-unkown-loader", enable_unkown_loader);
+  TEST ("nonexistent-loader", nonexistent_loader);
+  TEST ("disabled-loader", disabled_loader);
   TEST ("enable-loader-multiple-times", enable_loader_multiple_times);
 
   TEST ("nonexistent-search-path", nonexistent_search_path);
 
+  /* MUST be last */
   TEST_FUNC ("shutdown", shutdown);
-  TEST ("shutdown/subprocess", shutdown_subprocess);
 
 #undef TEST
 
