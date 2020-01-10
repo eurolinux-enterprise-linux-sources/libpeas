@@ -14,7 +14,7 @@
 
 Name:		libpeas
 Version:	1.12.1
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	Plug-ins implementation convenience library
 
 Group:		System Environment/Libraries
@@ -39,6 +39,8 @@ BuildRequires:	glade-devel
 
 BuildRequires:	autoconf automake gnome-common
 
+Patch0: libpeas-1.12.1-EL7.3_translations.patch
+
 # For the girepository-1.0 directory
 Requires:	gobject-introspection%{?_isa}
 
@@ -57,6 +59,7 @@ that are needed to write applications that use libpeas.
 
 %prep
 %setup -q
+%patch0 -p1
 
 %build
 %configure %{seed_option}
@@ -126,6 +129,10 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor >&/dev/null || :
 %{_datadir}/glade/catalogs/libpeas-gtk.xml
 
 %changelog
+* Thu Jun 30 2016 Bastien Nocera <bnocera@redhat.com> - 1.12.1-2
+- Update translations
+Resolves: #1304243
+
 * Wed Jun 24 2015 Ray Strode <rstrode@redhat.com>- 1.12.1-1
 - Update to 1.12.1
 
