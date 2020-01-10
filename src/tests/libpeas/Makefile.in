@@ -81,9 +81,9 @@ host_triplet = @host@
 DIST_COMMON = $(top_srcdir)/tests/Makefile.tests $(srcdir)/Makefile.in \
 	$(srcdir)/Makefile.am $(top_srcdir)/depcomp
 noinst_PROGRAMS = $(am__EXEEXT_4)
-@ENABLE_PYTHON2_TRUE@am__append_1 = extension-python
-@ENABLE_PYTHON3_TRUE@am__append_2 = extension-python3
-@ENABLE_SEED_TRUE@am__append_3 = extension-seed
+@ENABLE_LUA51_TRUE@am__append_1 = extension-lua51
+@ENABLE_PYTHON2_TRUE@am__append_2 = extension-python
+@ENABLE_PYTHON3_TRUE@am__append_3 = extension-python3
 subdir = tests/libpeas
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/gtk-doc.m4 \
@@ -97,9 +97,9 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-@ENABLE_PYTHON2_TRUE@am__EXEEXT_1 = extension-python$(EXEEXT)
-@ENABLE_PYTHON3_TRUE@am__EXEEXT_2 = extension-python3$(EXEEXT)
-@ENABLE_SEED_TRUE@am__EXEEXT_3 = extension-seed$(EXEEXT)
+@ENABLE_LUA51_TRUE@am__EXEEXT_1 = extension-lua51$(EXEEXT)
+@ENABLE_PYTHON2_TRUE@am__EXEEXT_2 = extension-python$(EXEEXT)
+@ENABLE_PYTHON3_TRUE@am__EXEEXT_3 = extension-python3$(EXEEXT)
 am__EXEEXT_4 = engine$(EXEEXT) extension-c$(EXEEXT) \
 	extension-set$(EXEEXT) plugin-info$(EXEEXT) $(am__EXEEXT_1) \
 	$(am__EXEEXT_2) $(am__EXEEXT_3)
@@ -118,19 +118,26 @@ am__v_lt_0 = --silent
 am__v_lt_1 = 
 extension_c_SOURCES = extension-c.c
 extension_c_OBJECTS = extension-c.$(OBJEXT)
-extension_c_LDADD = $(LDADD)
-extension_c_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	$(top_builddir)/libpeas/libpeas-1.0.la \
-	./introspection/libintrospection-1.0.la \
-	./testing/libtesting.la ../testing-util/libtesting-util.la
-am__extension_python_SOURCES_DIST = extension-py.c
-@ENABLE_PYTHON2_TRUE@am_extension_python_OBJECTS =  \
-@ENABLE_PYTHON2_TRUE@	extension_python-extension-py.$(OBJEXT)
-extension_python_OBJECTS = $(am_extension_python_OBJECTS)
 am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) \
 	$(top_builddir)/libpeas/libpeas-1.0.la \
 	./introspection/libintrospection-1.0.la \
 	./testing/libtesting.la ../testing-util/libtesting-util.la
+extension_c_DEPENDENCIES = $(am__DEPENDENCIES_2) \
+	$(builddir)/plugins/embedded/libembedded.la
+am__extension_lua51_SOURCES_DIST = extension-lua.c
+@ENABLE_LUA51_TRUE@am_extension_lua51_OBJECTS =  \
+@ENABLE_LUA51_TRUE@	extension_lua51-extension-lua.$(OBJEXT)
+extension_lua51_OBJECTS = $(am_extension_lua51_OBJECTS)
+@ENABLE_LUA51_TRUE@extension_lua51_DEPENDENCIES =  \
+@ENABLE_LUA51_TRUE@	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_1)
+extension_lua51_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(extension_lua51_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
+	-o $@
+am__extension_python_SOURCES_DIST = extension-py.c
+@ENABLE_PYTHON2_TRUE@am_extension_python_OBJECTS =  \
+@ENABLE_PYTHON2_TRUE@	extension_python-extension-py.$(OBJEXT)
+extension_python_OBJECTS = $(am_extension_python_OBJECTS)
 @ENABLE_PYTHON2_TRUE@extension_python_DEPENDENCIES =  \
 @ENABLE_PYTHON2_TRUE@	$(am__DEPENDENCIES_2) \
 @ENABLE_PYTHON2_TRUE@	$(am__DEPENDENCIES_1) \
@@ -151,14 +158,6 @@ extension_python3_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(extension_python3_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
-extension_seed_SOURCES = extension-seed.c
-extension_seed_OBJECTS = extension_seed-extension-seed.$(OBJEXT)
-@ENABLE_SEED_TRUE@extension_seed_DEPENDENCIES = $(am__DEPENDENCIES_2) \
-@ENABLE_SEED_TRUE@	$(am__DEPENDENCIES_1)
-extension_seed_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(extension_seed_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o \
-	$@
 extension_set_SOURCES = extension-set.c
 extension_set_OBJECTS = extension-set.$(OBJEXT)
 extension_set_LDADD = $(LDADD)
@@ -207,13 +206,14 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = engine.c extension-c.c $(extension_python_SOURCES) \
-	$(extension_python3_SOURCES) extension-seed.c extension-set.c \
-	plugin-info.c
-DIST_SOURCES = engine.c extension-c.c \
-	$(am__extension_python_SOURCES_DIST) \
-	$(am__extension_python3_SOURCES_DIST) extension-seed.c \
+SOURCES = engine.c extension-c.c $(extension_lua51_SOURCES) \
+	$(extension_python_SOURCES) $(extension_python3_SOURCES) \
 	extension-set.c plugin-info.c
+DIST_SOURCES = engine.c extension-c.c \
+	$(am__extension_lua51_SOURCES_DIST) \
+	$(am__extension_python_SOURCES_DIST) \
+	$(am__extension_python3_SOURCES_DIST) extension-set.c \
+	plugin-info.c
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
 	ctags-recursive dvi-recursive html-recursive info-recursive \
 	install-data-recursive install-dvi-recursive \
@@ -317,6 +317,7 @@ GLADE_CATALOG_DIR = @GLADE_CATALOG_DIR@
 GLIB_COMPILE_RESOURCES = @GLIB_COMPILE_RESOURCES@
 GLIB_GENMARSHAL = @GLIB_GENMARSHAL@
 GLIB_MKENUMS = @GLIB_MKENUMS@
+GLIB_PREFIX = @GLIB_PREFIX@
 GLIB_REQUIRED = @GLIB_REQUIRED@
 GMSGFMT = @GMSGFMT@
 GREP = @GREP@
@@ -326,6 +327,7 @@ GTKDOC_DEPS_CFLAGS = @GTKDOC_DEPS_CFLAGS@
 GTKDOC_DEPS_LIBS = @GTKDOC_DEPS_LIBS@
 GTKDOC_MKPDF = @GTKDOC_MKPDF@
 GTKDOC_REBASE = @GTKDOC_REBASE@
+GTK_PREFIX = @GTK_PREFIX@
 GTK_REQUIRED = @GTK_REQUIRED@
 HTML_DIR = @HTML_DIR@
 INSTALL = @INSTALL@
@@ -362,6 +364,9 @@ LTLIBOBJS = @LTLIBOBJS@
 LT_AGE = @LT_AGE@
 LT_CURRENT = @LT_CURRENT@
 LT_REVISION = @LT_REVISION@
+LUA51_BIN = @LUA51_BIN@
+LUA51_CFLAGS = @LUA51_CFLAGS@
+LUA51_LIBS = @LUA51_LIBS@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
@@ -398,24 +403,22 @@ PYGOBJECT_CFLAGS = @PYGOBJECT_CFLAGS@
 PYGOBJECT_LIBS = @PYGOBJECT_LIBS@
 PYTHON = @PYTHON@
 PYTHON2 = @PYTHON2@
+PYTHON2_BIN = @PYTHON2_BIN@
 PYTHON2_CFLAGS = @PYTHON2_CFLAGS@
 PYTHON2_CONFIG = @PYTHON2_CONFIG@
 PYTHON2_LDFLAGS = @PYTHON2_LDFLAGS@
 PYTHON2_LIBS = @PYTHON2_LIBS@
-PYTHON2_PYEXECDIR = @PYTHON2_PYEXECDIR@
+PYTHON3_BIN = @PYTHON3_BIN@
 PYTHON3_CFLAGS = @PYTHON3_CFLAGS@
 PYTHON3_CONFIG = @PYTHON3_CONFIG@
 PYTHON3_LDFLAGS = @PYTHON3_LDFLAGS@
 PYTHON3_LIBS = @PYTHON3_LIBS@
-PYTHON3_PYEXECDIR = @PYTHON3_PYEXECDIR@
 PYTHON_EXEC_PREFIX = @PYTHON_EXEC_PREFIX@
 PYTHON_PLATFORM = @PYTHON_PLATFORM@
 PYTHON_PREFIX = @PYTHON_PREFIX@
 PYTHON_VERSION = @PYTHON_VERSION@
 RANLIB = @RANLIB@
 SED = @SED@
-SEED_CFLAGS = @SEED_CFLAGS@
-SEED_LIBS = @SEED_LIBS@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -489,7 +492,7 @@ top_srcdir = @top_srcdir@
 GTESTER = gtester
 TEST_PROGS = engine extension-c extension-set plugin-info \
 	$(am__append_1) $(am__append_2) $(am__append_3)
-CLEANFILES = cgdump-* vgdump-*
+CLEANFILES = callgrind-*.log valgrind-*.log
 SUBDIRS = introspection plugins testing
 AM_CPPFLAGS = \
 	-I$(top_srcdir)			\
@@ -506,14 +509,16 @@ LDADD = \
 	./testing/libtesting.la			\
 	../testing-util/libtesting-util.la
 
+extension_c_LDADD = $(LDADD) $(builddir)/plugins/embedded/libembedded.la
+@ENABLE_LUA51_TRUE@extension_lua51_SOURCES = extension-lua.c
+@ENABLE_LUA51_TRUE@extension_lua51_CFLAGS = $(LUA51_CFLAGS)
+@ENABLE_LUA51_TRUE@extension_lua51_LDADD = $(LDADD) $(LUA51_LIBS)
 @ENABLE_PYTHON2_TRUE@extension_python_SOURCES = extension-py.c
 @ENABLE_PYTHON2_TRUE@extension_python_CFLAGS = $(PYGOBJECT_CFLAGS) $(PYTHON2_CFLAGS)
 @ENABLE_PYTHON2_TRUE@extension_python_LDADD = $(LDADD) $(PYGOBJECT_LIBS) $(PYTHON2_LIBS)
 @ENABLE_PYTHON3_TRUE@extension_python3_SOURCES = extension-py.c
 @ENABLE_PYTHON3_TRUE@extension_python3_CFLAGS = $(PYGOBJECT_CFLAGS) $(PYTHON3_CFLAGS)
 @ENABLE_PYTHON3_TRUE@extension_python3_LDADD = $(LDADD) $(PYGOBJECT_LIBS) $(PYTHON3_LIBS)
-@ENABLE_SEED_TRUE@extension_seed_CFLAGS = $(SEED_CFLAGS)
-@ENABLE_SEED_TRUE@extension_seed_LDADD = $(LDADD) $(SEED_LIBS)
 all: all-recursive
 
 .SUFFIXES:
@@ -567,6 +572,10 @@ extension-c$(EXEEXT): $(extension_c_OBJECTS) $(extension_c_DEPENDENCIES) $(EXTRA
 	@rm -f extension-c$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(extension_c_OBJECTS) $(extension_c_LDADD) $(LIBS)
 
+extension-lua51$(EXEEXT): $(extension_lua51_OBJECTS) $(extension_lua51_DEPENDENCIES) $(EXTRA_extension_lua51_DEPENDENCIES) 
+	@rm -f extension-lua51$(EXEEXT)
+	$(AM_V_CCLD)$(extension_lua51_LINK) $(extension_lua51_OBJECTS) $(extension_lua51_LDADD) $(LIBS)
+
 extension-python$(EXEEXT): $(extension_python_OBJECTS) $(extension_python_DEPENDENCIES) $(EXTRA_extension_python_DEPENDENCIES) 
 	@rm -f extension-python$(EXEEXT)
 	$(AM_V_CCLD)$(extension_python_LINK) $(extension_python_OBJECTS) $(extension_python_LDADD) $(LIBS)
@@ -574,10 +583,6 @@ extension-python$(EXEEXT): $(extension_python_OBJECTS) $(extension_python_DEPEND
 extension-python3$(EXEEXT): $(extension_python3_OBJECTS) $(extension_python3_DEPENDENCIES) $(EXTRA_extension_python3_DEPENDENCIES) 
 	@rm -f extension-python3$(EXEEXT)
 	$(AM_V_CCLD)$(extension_python3_LINK) $(extension_python3_OBJECTS) $(extension_python3_LDADD) $(LIBS)
-
-extension-seed$(EXEEXT): $(extension_seed_OBJECTS) $(extension_seed_DEPENDENCIES) $(EXTRA_extension_seed_DEPENDENCIES) 
-	@rm -f extension-seed$(EXEEXT)
-	$(AM_V_CCLD)$(extension_seed_LINK) $(extension_seed_OBJECTS) $(extension_seed_LDADD) $(LIBS)
 
 extension-set$(EXEEXT): $(extension_set_OBJECTS) $(extension_set_DEPENDENCIES) $(EXTRA_extension_set_DEPENDENCIES) 
 	@rm -f extension-set$(EXEEXT)
@@ -596,9 +601,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/engine.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extension-c.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extension-set.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extension_lua51-extension-lua.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extension_python-extension-py.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extension_python3-extension-py.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extension_seed-extension-seed.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin-info.Po@am__quote@
 
 .c.o:
@@ -621,6 +626,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
+
+extension_lua51-extension-lua.o: extension-lua.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(extension_lua51_CFLAGS) $(CFLAGS) -MT extension_lua51-extension-lua.o -MD -MP -MF $(DEPDIR)/extension_lua51-extension-lua.Tpo -c -o extension_lua51-extension-lua.o `test -f 'extension-lua.c' || echo '$(srcdir)/'`extension-lua.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/extension_lua51-extension-lua.Tpo $(DEPDIR)/extension_lua51-extension-lua.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='extension-lua.c' object='extension_lua51-extension-lua.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(extension_lua51_CFLAGS) $(CFLAGS) -c -o extension_lua51-extension-lua.o `test -f 'extension-lua.c' || echo '$(srcdir)/'`extension-lua.c
+
+extension_lua51-extension-lua.obj: extension-lua.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(extension_lua51_CFLAGS) $(CFLAGS) -MT extension_lua51-extension-lua.obj -MD -MP -MF $(DEPDIR)/extension_lua51-extension-lua.Tpo -c -o extension_lua51-extension-lua.obj `if test -f 'extension-lua.c'; then $(CYGPATH_W) 'extension-lua.c'; else $(CYGPATH_W) '$(srcdir)/extension-lua.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/extension_lua51-extension-lua.Tpo $(DEPDIR)/extension_lua51-extension-lua.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='extension-lua.c' object='extension_lua51-extension-lua.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(extension_lua51_CFLAGS) $(CFLAGS) -c -o extension_lua51-extension-lua.obj `if test -f 'extension-lua.c'; then $(CYGPATH_W) 'extension-lua.c'; else $(CYGPATH_W) '$(srcdir)/extension-lua.c'; fi`
 
 extension_python-extension-py.o: extension-py.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(extension_python_CFLAGS) $(CFLAGS) -MT extension_python-extension-py.o -MD -MP -MF $(DEPDIR)/extension_python-extension-py.Tpo -c -o extension_python-extension-py.o `test -f 'extension-py.c' || echo '$(srcdir)/'`extension-py.c
@@ -649,20 +668,6 @@ extension_python3-extension-py.obj: extension-py.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='extension-py.c' object='extension_python3-extension-py.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(extension_python3_CFLAGS) $(CFLAGS) -c -o extension_python3-extension-py.obj `if test -f 'extension-py.c'; then $(CYGPATH_W) 'extension-py.c'; else $(CYGPATH_W) '$(srcdir)/extension-py.c'; fi`
-
-extension_seed-extension-seed.o: extension-seed.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(extension_seed_CFLAGS) $(CFLAGS) -MT extension_seed-extension-seed.o -MD -MP -MF $(DEPDIR)/extension_seed-extension-seed.Tpo -c -o extension_seed-extension-seed.o `test -f 'extension-seed.c' || echo '$(srcdir)/'`extension-seed.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/extension_seed-extension-seed.Tpo $(DEPDIR)/extension_seed-extension-seed.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='extension-seed.c' object='extension_seed-extension-seed.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(extension_seed_CFLAGS) $(CFLAGS) -c -o extension_seed-extension-seed.o `test -f 'extension-seed.c' || echo '$(srcdir)/'`extension-seed.c
-
-extension_seed-extension-seed.obj: extension-seed.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(extension_seed_CFLAGS) $(CFLAGS) -MT extension_seed-extension-seed.obj -MD -MP -MF $(DEPDIR)/extension_seed-extension-seed.Tpo -c -o extension_seed-extension-seed.obj `if test -f 'extension-seed.c'; then $(CYGPATH_W) 'extension-seed.c'; else $(CYGPATH_W) '$(srcdir)/extension-seed.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/extension_seed-extension-seed.Tpo $(DEPDIR)/extension_seed-extension-seed.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='extension-seed.c' object='extension_seed-extension-seed.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(extension_seed_CFLAGS) $(CFLAGS) -c -o extension_seed-extension-seed.obj `if test -f 'extension-seed.c'; then $(CYGPATH_W) 'extension-seed.c'; else $(CYGPATH_W) '$(srcdir)/extension-seed.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -969,24 +974,24 @@ test: all
 @VALGRIND_ENABLED_TRUE@test-valgrind: all
 @VALGRIND_ENABLED_TRUE@	@test -z "$(TEST_PROGS)" || \
 @VALGRIND_ENABLED_TRUE@	 for test_prog in $(TEST_PROGS) ; do \
-@VALGRIND_ENABLED_TRUE@	   if test -e vgdump-$$test_prog; then \
-@VALGRIND_ENABLED_TRUE@	     unlink vgdump-$$test_prog; \
+@VALGRIND_ENABLED_TRUE@	   if test -e valgrind-$${test_prog}.log; then \
+@VALGRIND_ENABLED_TRUE@	     unlink valgrind-$${test_prog}.log; \
 @VALGRIND_ENABLED_TRUE@	   fi ; \
 @VALGRIND_ENABLED_TRUE@	   G_SLICE=always-malloc G_DEBUG=gc-friendly,resident-modules \
 @VALGRIND_ENABLED_TRUE@	     libtool --mode=execute valgrind --leak-check=full \
 @VALGRIND_ENABLED_TRUE@	     --leak-resolution=high --num-callers=20 \
 @VALGRIND_ENABLED_TRUE@	     --suppressions=$(top_srcdir)/tests/valgrind.suppressions \
-@VALGRIND_ENABLED_TRUE@	     --log-file=vgdump-$$test_prog $$test_prog || exit 1 ; \
+@VALGRIND_ENABLED_TRUE@	     --log-file=valgrind-$${test_prog}.log $$test_prog || exit 1 ; \
 @VALGRIND_ENABLED_TRUE@	 done
 
 @VALGRIND_ENABLED_TRUE@test-callgrind: all
 @VALGRIND_ENABLED_TRUE@	@test -z "$(TEST_PROGS)" || \
 @VALGRIND_ENABLED_TRUE@	 for test_prog in $(TEST_PROGS) ; do \
-@VALGRIND_ENABLED_TRUE@	   if test -e cgdump-$$test_prog; then \
-@VALGRIND_ENABLED_TRUE@	     unlink cgdump-$$test_prog; \
+@VALGRIND_ENABLED_TRUE@	   if test -e callgrind-$${test_prog}.log; then \
+@VALGRIND_ENABLED_TRUE@	     unlink callgrind-$${test_prog}.log; \
 @VALGRIND_ENABLED_TRUE@	   fi ; \
 @VALGRIND_ENABLED_TRUE@	   libtool --mode=execute valgrind --tool=callgrind \
-@VALGRIND_ENABLED_TRUE@	     --callgrind-out-file=cgdump-$$test_prog \
+@VALGRIND_ENABLED_TRUE@	     --callgrind-out-file=callgrind-$${test_prog}.log \
 @VALGRIND_ENABLED_TRUE@	     --log-file=/dev/null $$test_prog || exit 1 ; \
 @VALGRIND_ENABLED_TRUE@	 done
 

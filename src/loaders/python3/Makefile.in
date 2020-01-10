@@ -129,7 +129,7 @@ libpython3loader_la_DEPENDENCIES =  \
 	$(top_builddir)/libpeas/libpeas-1.0.la $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_libpython3loader_la_OBJECTS = peas-plugin-loader-python.lo \
-	peas-plugin-loader-python3-resources.lo
+	peas-python-internal.lo peas-python3-resources.lo
 libpython3loader_la_OBJECTS = $(am_libpython3loader_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -236,6 +236,7 @@ GLADE_CATALOG_DIR = @GLADE_CATALOG_DIR@
 GLIB_COMPILE_RESOURCES = @GLIB_COMPILE_RESOURCES@
 GLIB_GENMARSHAL = @GLIB_GENMARSHAL@
 GLIB_MKENUMS = @GLIB_MKENUMS@
+GLIB_PREFIX = @GLIB_PREFIX@
 GLIB_REQUIRED = @GLIB_REQUIRED@
 GMSGFMT = @GMSGFMT@
 GREP = @GREP@
@@ -245,6 +246,7 @@ GTKDOC_DEPS_CFLAGS = @GTKDOC_DEPS_CFLAGS@
 GTKDOC_DEPS_LIBS = @GTKDOC_DEPS_LIBS@
 GTKDOC_MKPDF = @GTKDOC_MKPDF@
 GTKDOC_REBASE = @GTKDOC_REBASE@
+GTK_PREFIX = @GTK_PREFIX@
 GTK_REQUIRED = @GTK_REQUIRED@
 HTML_DIR = @HTML_DIR@
 INSTALL = @INSTALL@
@@ -281,6 +283,9 @@ LTLIBOBJS = @LTLIBOBJS@
 LT_AGE = @LT_AGE@
 LT_CURRENT = @LT_CURRENT@
 LT_REVISION = @LT_REVISION@
+LUA51_BIN = @LUA51_BIN@
+LUA51_CFLAGS = @LUA51_CFLAGS@
+LUA51_LIBS = @LUA51_LIBS@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
@@ -317,24 +322,22 @@ PYGOBJECT_CFLAGS = @PYGOBJECT_CFLAGS@
 PYGOBJECT_LIBS = @PYGOBJECT_LIBS@
 PYTHON = @PYTHON@
 PYTHON2 = @PYTHON2@
+PYTHON2_BIN = @PYTHON2_BIN@
 PYTHON2_CFLAGS = @PYTHON2_CFLAGS@
 PYTHON2_CONFIG = @PYTHON2_CONFIG@
 PYTHON2_LDFLAGS = @PYTHON2_LDFLAGS@
 PYTHON2_LIBS = @PYTHON2_LIBS@
-PYTHON2_PYEXECDIR = @PYTHON2_PYEXECDIR@
+PYTHON3_BIN = @PYTHON3_BIN@
 PYTHON3_CFLAGS = @PYTHON3_CFLAGS@
 PYTHON3_CONFIG = @PYTHON3_CONFIG@
 PYTHON3_LDFLAGS = @PYTHON3_LDFLAGS@
 PYTHON3_LIBS = @PYTHON3_LIBS@
-PYTHON3_PYEXECDIR = @PYTHON3_PYEXECDIR@
 PYTHON_EXEC_PREFIX = @PYTHON_EXEC_PREFIX@
 PYTHON_PLATFORM = @PYTHON_PLATFORM@
 PYTHON_PREFIX = @PYTHON_PREFIX@
 PYTHON_VERSION = @PYTHON_VERSION@
 RANLIB = @RANLIB@
 SED = @SED@
-SEED_CFLAGS = @SEED_CFLAGS@
-SEED_LIBS = @SEED_LIBS@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -414,14 +417,15 @@ AM_CPPFLAGS = \
 	$(DISABLE_DEPRECATED)		\
 	$(PYGOBJECT_CFLAGS)		\
 	$(PYTHON3_CFLAGS)		\
-	-DPEAS_PYEXECDIR=\""$(PYTHON3_PYEXECDIR)"\" \
 	-DPEAS_LOCALEDIR=\""$(prefix)/$(DATADIRNAME)/locale"\"
 
 loader_LTLIBRARIES = libpython3loader.la
 libpython3loader_la_SOURCES = \
 	$(top_srcdir)/loaders/python/peas-plugin-loader-python.c	\
 	$(top_srcdir)/loaders/python/peas-plugin-loader-python.h	\
-	peas-plugin-loader-python3-resources.c
+	$(top_srcdir)/loaders/python/peas-python-internal.c 		\
+	$(top_srcdir)/loaders/python/peas-python-internal.h 		\
+	peas-python3-resources.c
 
 libpython3loader_la_LDFLAGS = \
 	$(LOADER_LIBTOOL_FLAGS)		\
@@ -434,12 +438,13 @@ libpython3loader_la_LIBADD = \
 	$(PYGOBJECT_LIBS)			\
 	$(PYTHON3_LIBS)
 
-loader_resources_deps = $(shell $(GLIB_COMPILE_RESOURCES) --sourcedir=$(srcdir) --generate-dependencies $(srcdir)/peas-plugin-loader-python3.gresource.xml)
-EXTRA_DIST = \
-	peas-plugin-loader-python3.gresource.xml		\
-	$(loader_resources_deps)
+loader_resources_deps = $(shell $(GLIB_COMPILE_RESOURCES) --sourcedir="$(srcdir)" --generate-dependencies "$(srcdir)/peas-python3.gresource.xml")
+loader_resources_c_deps = $(srcdir)/peas-python3.gresource.xml $(loader_resources_deps)
+EXTRA_DIST = $(loader_resources_c_deps)
+CLEANFILES = \
+	peas-python3-internal.pyc	\
+	peas-python3-resources.c
 
-CLEANFILES = peas-plugin-loader-python3-resources.c
 gcov_sources = $(libpython3loader_la_SOURCES)
 all: all-am
 
@@ -522,7 +527,8 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/peas-plugin-loader-python.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/peas-plugin-loader-python3-resources.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/peas-python-internal.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/peas-python3-resources.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -551,6 +557,13 @@ peas-plugin-loader-python.lo: $(top_srcdir)/loaders/python/peas-plugin-loader-py
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(top_srcdir)/loaders/python/peas-plugin-loader-python.c' object='peas-plugin-loader-python.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o peas-plugin-loader-python.lo `test -f '$(top_srcdir)/loaders/python/peas-plugin-loader-python.c' || echo '$(srcdir)/'`$(top_srcdir)/loaders/python/peas-plugin-loader-python.c
+
+peas-python-internal.lo: $(top_srcdir)/loaders/python/peas-python-internal.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT peas-python-internal.lo -MD -MP -MF $(DEPDIR)/peas-python-internal.Tpo -c -o peas-python-internal.lo `test -f '$(top_srcdir)/loaders/python/peas-python-internal.c' || echo '$(srcdir)/'`$(top_srcdir)/loaders/python/peas-python-internal.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/peas-python-internal.Tpo $(DEPDIR)/peas-python-internal.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(top_srcdir)/loaders/python/peas-python-internal.c' object='peas-python-internal.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o peas-python-internal.lo `test -f '$(top_srcdir)/loaders/python/peas-python-internal.c' || echo '$(srcdir)/'`$(top_srcdir)/loaders/python/peas-python-internal.c
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -642,7 +655,7 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LTLIBRARIES)
+all-am: Makefile $(LTLIBRARIES) all-local
 installdirs:
 	for dir in "$(DESTDIR)$(loaderdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
@@ -751,23 +764,34 @@ uninstall-am: uninstall-loaderLTLIBRARIES
 
 .MAKE: install-am install-strip
 
-.PHONY: CTAGS GTAGS TAGS all all-am check check-am clean clean-generic \
-	clean-libtool clean-loaderLTLIBRARIES cscopelist-am ctags \
-	ctags-am distclean distclean-compile distclean-generic \
-	distclean-libtool distclean-tags distdir dvi dvi-am html \
-	html-am info info-am install install-am install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-loaderLTLIBRARIES install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
-	pdf pdf-am ps ps-am tags tags-am uninstall uninstall-am \
-	uninstall-loaderLTLIBRARIES
+.PHONY: CTAGS GTAGS TAGS all all-am all-local check check-am clean \
+	clean-generic clean-libtool clean-loaderLTLIBRARIES \
+	cscopelist-am ctags ctags-am distclean distclean-compile \
+	distclean-generic distclean-libtool distclean-tags distdir dvi \
+	dvi-am html html-am info info-am install install-am \
+	install-data install-data-am install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-loaderLTLIBRARIES \
+	install-man install-pdf install-pdf-am install-ps \
+	install-ps-am install-strip installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-am uninstall \
+	uninstall-am uninstall-loaderLTLIBRARIES
 
-peas-plugin-loader-python3-resources.c: $(srcdir)/peas-plugin-loader-python3.gresource.xml $(loader_resources_deps)
-	$(AM_V_GEN) $(GLIB_COMPILE_RESOURCES) --internal --target=$@ --sourcedir=$(srcdir) --generate-source $(srcdir)/peas-plugin-loader-python3.gresource.xml
+
+peas-python3-internal.pyc: $(srcdir)/../python/peas-python-internal.py
+	$(AM_V_GEN) $(PYTHON3_BIN) $(srcdir)/../python/peas-python-compile.py $< $@
+
+all-local: peas-python3-internal.pyc
+
+peas-python3-resources.c: $(loader_resources_c_deps)
+	$(AM_V_GEN) $(GLIB_COMPILE_RESOURCES)		\
+	--target="$@"					\
+	--sourcedir="$(srcdir)"				\
+	--generate-source				\
+	--internal					\
+	"$(srcdir)/peas-python3.gresource.xml"
 
 @GCOV_ENABLED_TRUE@gcov: all
 @GCOV_ENABLED_TRUE@	@echo ""; \

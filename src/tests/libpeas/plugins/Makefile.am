@@ -1,6 +1,10 @@
 include $(top_srcdir)/tests/Makefile.plugin
 
-SUBDIRS = extension-c
+SUBDIRS = embedded extension-c
+
+if ENABLE_LUA51
+SUBDIRS += extension-lua
+endif
 
 if ENABLE_PYTHON3
 SUBDIRS += extension-python
@@ -10,23 +14,18 @@ SUBDIRS += extension-python
 endif
 endif
 
-if ENABLE_SEED
-SUBDIRS += extension-seed
-endif
-
 noinst_PLUGIN = \
-	disabled-loader.plugin			\
 	extension-c-nonexistent.plugin		\
+	extension-lua51-nonexistent.plugin	\
 	extension-python-nonexistent.plugin	\
 	extension-python3-nonexistent.plugin	\
-	extension-seed-nonexistent.plugin	\
 	info-missing-module.plugin		\
 	info-missing-name.plugin		\
 	invalid.plugin				\
-	invalid-loader.plugin			\
 	nonexistent-dep.plugin			\
-	nonexistent-loader.plugin		\
 	not-loadable.plugin			\
-	os-dependant-help.plugin
+	os-dependant-help.plugin		\
+	two-deps.plugin				\
+	unkown-loader.plugin
 
 EXTRA_DIST = $(noinst_PLUGIN)

@@ -4,19 +4,19 @@
  *
  * Copyright (C) 2008 - Jesse van den Kieboom
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU Library General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ * libpeas is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ * libpeas is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU Library General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -57,8 +57,29 @@ peas_plugin_loader_initialize (PeasPluginLoader *loader)
 
   klass = PEAS_PLUGIN_LOADER_GET_CLASS (loader);
 
+  /* Do this here instead of each time */
+  g_return_val_if_fail (klass->load != NULL, FALSE);
+  g_return_val_if_fail (klass->unload != NULL, FALSE);
+  g_return_val_if_fail (klass->provides_extension != NULL, FALSE);
+  g_return_val_if_fail (klass->create_extension != NULL, FALSE);
+
   if (klass->initialize != NULL)
     return klass->initialize (loader);
+
+  return TRUE;
+}
+
+gboolean
+peas_plugin_loader_is_global (PeasPluginLoader *loader)
+{
+  PeasPluginLoaderClass *klass;
+
+  g_return_val_if_fail (PEAS_IS_PLUGIN_LOADER (loader), FALSE);
+
+  klass = PEAS_PLUGIN_LOADER_GET_CLASS (loader);
+
+  if (klass->is_global != NULL)
+    return klass->is_global (loader);
 
   return TRUE;
 }
@@ -67,28 +88,19 @@ gboolean
 peas_plugin_loader_load (PeasPluginLoader *loader,
                          PeasPluginInfo   *info)
 {
-  PeasPluginLoaderClass *klass;
 
   g_return_val_if_fail (PEAS_IS_PLUGIN_LOADER (loader), FALSE);
 
-  klass = PEAS_PLUGIN_LOADER_GET_CLASS (loader);
-  g_return_val_if_fail (klass->load != NULL, FALSE);
-
-  return klass->load (loader, info);
+  return PEAS_PLUGIN_LOADER_GET_CLASS (loader)->load (loader, info);
 }
 
 void
 peas_plugin_loader_unload (PeasPluginLoader *loader,
                            PeasPluginInfo   *info)
 {
-  PeasPluginLoaderClass *klass;
-
   g_return_if_fail (PEAS_IS_PLUGIN_LOADER (loader));
 
-  klass = PEAS_PLUGIN_LOADER_GET_CLASS (loader);
-  g_return_if_fail (klass->unload != NULL);
-
-  klass->unload (loader, info);
+  PEAS_PLUGIN_LOADER_GET_CLASS (loader)->unload (loader, info);
 }
 
 gboolean
@@ -101,8 +113,6 @@ peas_plugin_loader_provides_extension (PeasPluginLoader *loader,
   g_return_val_if_fail (PEAS_IS_PLUGIN_LOADER (loader), FALSE);
 
   klass = PEAS_PLUGIN_LOADER_GET_CLASS (loader);
-  g_return_val_if_fail (klass->provides_extension != NULL, FALSE);
-
   return klass->provides_extension (loader, info, ext_type);
 }
 
@@ -118,9 +128,8 @@ peas_plugin_loader_create_extension (PeasPluginLoader *loader,
   g_return_val_if_fail (PEAS_IS_PLUGIN_LOADER (loader), NULL);
 
   klass = PEAS_PLUGIN_LOADER_GET_CLASS (loader);
-  g_return_val_if_fail (klass->create_extension != NULL, NULL);
-
-  return klass->create_extension (loader, info, ext_type, n_parameters, parameters);
+  return klass->create_extension (loader, info, ext_type,
+                                  n_parameters, parameters);
 }
 
 void

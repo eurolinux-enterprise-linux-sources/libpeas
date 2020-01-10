@@ -30,9 +30,16 @@ MKDB_OPTIONS=--sgml-mode --output-format=xml
 # e.g. MKTMPL_OPTIONS=--only-section-tmpl
 MKTMPL_OPTIONS=
 
+if ENABLE_DOC_CROSS_REFERENCES
 # Extra options to supply to gtkdoc-fixref. Not normally needed.
 # e.g. FIXXREF_OPTIONS=--extra-dir=../gdk-pixbuf/html --extra-dir=../gdk/html
-FIXXREF_OPTIONS=
+FIXXREF_OPTIONS = \
+	--extra-dir=$(GLIB_PREFIX)/share/gtk-doc/html/glib	\
+	--extra-dir=$(GLIB_PREFIX)/share/gtk-doc/html/gmodule	\
+	--extra-dir=$(GLIB_PREFIX)/share/gtk-doc/html/gobject	\
+	--extra-dir=$(GLIB_PREFIX)/share/gtk-doc/html/gio	\
+	--extra-dir=$(GTK_PREFIX)/share/gtk-doc/html/gtk
+endif
 
 # Used for dependencies. The docs will be rebuilt if any of these change.
 HFILE_GLOB = \
@@ -44,21 +51,19 @@ CFILE_GLOB = \
 	$(top_srcdir)/libpeas-gtk/*.c
 
 # Header files to ignore when scanning (These are internal to libpeas).
-IGNORE_HFILES=		\
+IGNORE_HFILES = \
 	peas-debug.h				\
 	peas-dirs.h				\
 	peas-engine-priv.h			\
-	peas-extension-wrapper.h		\
-	peas-extension-subclasses.h		\
 	peas-gtk-disable-plugins-dialog.h       \
 	peas-gtk-plugin-manager-store.h		\
-	peas-helpers.h				\
 	peas-i18n.h				\
 	peas-introspection.h			\
 	peas-marshal.h				\
 	peas-plugin-info-priv.h			\
 	peas-plugin-loader.h			\
-	peas-plugin-loader-c.h
+	peas-plugin-loader-c.h			\
+	peas-utils.h
 
 # Images to copy into HTML directory.
 HTML_IMAGES = \
@@ -95,3 +100,17 @@ include $(top_srcdir)/gtk-doc.make
 # Other files to distribute
 EXTRA_DIST += \
 	version.xml.in
+
+
+if ENABLE_GTK_DOC
+
+TESTS_ENVIRONMENT = \
+	SRCDIR=$(abs_srcdir)				\
+	BUILDDIR=$(abs_builddir)			\
+	DOC_MODULE=$(DOC_MODULE)			\
+	DOC_MAIN_SGML_FILE=$(DOC_MAIN_SGML_FILE)
+
+check-local: $(GTKDOC_CHECK)
+	@$(TESTS_ENVIRONMENT) ./$(GTKDOC_CHECK)
+
+endif

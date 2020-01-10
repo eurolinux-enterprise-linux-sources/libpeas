@@ -157,6 +157,7 @@ GLADE_CATALOG_DIR = @GLADE_CATALOG_DIR@
 GLIB_COMPILE_RESOURCES = @GLIB_COMPILE_RESOURCES@
 GLIB_GENMARSHAL = @GLIB_GENMARSHAL@
 GLIB_MKENUMS = @GLIB_MKENUMS@
+GLIB_PREFIX = @GLIB_PREFIX@
 GLIB_REQUIRED = @GLIB_REQUIRED@
 GMSGFMT = @GMSGFMT@
 GREP = @GREP@
@@ -166,6 +167,7 @@ GTKDOC_DEPS_CFLAGS = @GTKDOC_DEPS_CFLAGS@
 GTKDOC_DEPS_LIBS = @GTKDOC_DEPS_LIBS@
 GTKDOC_MKPDF = @GTKDOC_MKPDF@
 GTKDOC_REBASE = @GTKDOC_REBASE@
+GTK_PREFIX = @GTK_PREFIX@
 GTK_REQUIRED = @GTK_REQUIRED@
 HTML_DIR = @HTML_DIR@
 INSTALL = @INSTALL@
@@ -202,6 +204,9 @@ LTLIBOBJS = @LTLIBOBJS@
 LT_AGE = @LT_AGE@
 LT_CURRENT = @LT_CURRENT@
 LT_REVISION = @LT_REVISION@
+LUA51_BIN = @LUA51_BIN@
+LUA51_CFLAGS = @LUA51_CFLAGS@
+LUA51_LIBS = @LUA51_LIBS@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
@@ -238,24 +243,22 @@ PYGOBJECT_CFLAGS = @PYGOBJECT_CFLAGS@
 PYGOBJECT_LIBS = @PYGOBJECT_LIBS@
 PYTHON = @PYTHON@
 PYTHON2 = @PYTHON2@
+PYTHON2_BIN = @PYTHON2_BIN@
 PYTHON2_CFLAGS = @PYTHON2_CFLAGS@
 PYTHON2_CONFIG = @PYTHON2_CONFIG@
 PYTHON2_LDFLAGS = @PYTHON2_LDFLAGS@
 PYTHON2_LIBS = @PYTHON2_LIBS@
-PYTHON2_PYEXECDIR = @PYTHON2_PYEXECDIR@
+PYTHON3_BIN = @PYTHON3_BIN@
 PYTHON3_CFLAGS = @PYTHON3_CFLAGS@
 PYTHON3_CONFIG = @PYTHON3_CONFIG@
 PYTHON3_LDFLAGS = @PYTHON3_LDFLAGS@
 PYTHON3_LIBS = @PYTHON3_LIBS@
-PYTHON3_PYEXECDIR = @PYTHON3_PYEXECDIR@
 PYTHON_EXEC_PREFIX = @PYTHON_EXEC_PREFIX@
 PYTHON_PLATFORM = @PYTHON_PLATFORM@
 PYTHON_PREFIX = @PYTHON_PREFIX@
 PYTHON_VERSION = @PYTHON_VERSION@
 RANLIB = @RANLIB@
 SED = @SED@
-SEED_CFLAGS = @SEED_CFLAGS@
-SEED_LIBS = @SEED_LIBS@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -357,7 +360,13 @@ MKTMPL_OPTIONS =
 
 # Extra options to supply to gtkdoc-fixref. Not normally needed.
 # e.g. FIXXREF_OPTIONS=--extra-dir=../gdk-pixbuf/html --extra-dir=../gdk/html
-FIXXREF_OPTIONS = 
+@ENABLE_DOC_CROSS_REFERENCES_TRUE@FIXXREF_OPTIONS = \
+@ENABLE_DOC_CROSS_REFERENCES_TRUE@	--extra-dir=$(GLIB_PREFIX)/share/gtk-doc/html/glib	\
+@ENABLE_DOC_CROSS_REFERENCES_TRUE@	--extra-dir=$(GLIB_PREFIX)/share/gtk-doc/html/gmodule	\
+@ENABLE_DOC_CROSS_REFERENCES_TRUE@	--extra-dir=$(GLIB_PREFIX)/share/gtk-doc/html/gobject	\
+@ENABLE_DOC_CROSS_REFERENCES_TRUE@	--extra-dir=$(GLIB_PREFIX)/share/gtk-doc/html/gio	\
+@ENABLE_DOC_CROSS_REFERENCES_TRUE@	--extra-dir=$(GTK_PREFIX)/share/gtk-doc/html/gtk
+
 
 # Used for dependencies. The docs will be rebuilt if any of these change.
 HFILE_GLOB = \
@@ -374,17 +383,15 @@ IGNORE_HFILES = \
 	peas-debug.h				\
 	peas-dirs.h				\
 	peas-engine-priv.h			\
-	peas-extension-wrapper.h		\
-	peas-extension-subclasses.h		\
 	peas-gtk-disable-plugins-dialog.h       \
 	peas-gtk-plugin-manager-store.h		\
-	peas-helpers.h				\
 	peas-i18n.h				\
 	peas-introspection.h			\
 	peas-marshal.h				\
 	peas-plugin-info-priv.h			\
 	peas-plugin-loader.h			\
-	peas-plugin-loader-c.h
+	peas-plugin-loader-c.h			\
+	peas-utils.h
 
 
 # Images to copy into HTML directory.
@@ -434,6 +441,7 @@ GPATH = $(srcdir)
 TARGET_DIR = $(HTML_DIR)/$(DOC_MODULE)
 SETUP_FILES = \
 	$(content_files)		\
+	$(expand_content_files)		\
 	$(DOC_MAIN_SGML_FILE)		\
 	$(DOC_MODULE)-sections.txt	\
 	$(DOC_MODULE)-overrides.txt
@@ -495,6 +503,12 @@ GTK_DOC_V_XREF_0 = @echo "  DOC   Fixing cross-references";
 GTK_DOC_V_PDF = $(GTK_DOC_V_PDF_$(V))
 GTK_DOC_V_PDF_ = $(GTK_DOC_V_PDF_$(AM_DEFAULT_VERBOSITY))
 GTK_DOC_V_PDF_0 = @echo "  DOC   Building PDF";
+@ENABLE_GTK_DOC_TRUE@TESTS_ENVIRONMENT = \
+@ENABLE_GTK_DOC_TRUE@	SRCDIR=$(abs_srcdir)				\
+@ENABLE_GTK_DOC_TRUE@	BUILDDIR=$(abs_builddir)			\
+@ENABLE_GTK_DOC_TRUE@	DOC_MODULE=$(DOC_MODULE)			\
+@ENABLE_GTK_DOC_TRUE@	DOC_MAIN_SGML_FILE=$(DOC_MAIN_SGML_FILE)
+
 all: all-am
 
 .SUFFIXES:
@@ -577,7 +591,9 @@ distdir: $(DISTFILES)
 	$(MAKE) $(AM_MAKEFLAGS) \
 	  top_distdir="$(top_distdir)" distdir="$(distdir)" \
 	  dist-hook
+@ENABLE_GTK_DOC_FALSE@check-local:
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) check-local
 check: check-am
 @ENABLE_GTK_DOC_FALSE@all-local:
 all-am: Makefile all-local
@@ -680,21 +696,21 @@ ps-am:
 
 uninstall-am: uninstall-local
 
-.MAKE: install-am install-strip
+.MAKE: check-am install-am install-strip
 
-.PHONY: all all-am all-local check check-am clean clean-generic \
-	clean-libtool clean-local cscopelist-am ctags-am dist-hook \
-	distclean distclean-generic distclean-libtool distclean-local \
-	distdir dvi dvi-am html html-am info info-am install \
-	install-am install-data install-data-am install-data-local \
-	install-dvi install-dvi-am install-exec install-exec-am \
-	install-html install-html-am install-info install-info-am \
-	install-man install-pdf install-pdf-am install-ps \
-	install-ps-am install-strip installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-generic \
-	maintainer-clean-local mostlyclean mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am tags-am uninstall \
-	uninstall-am uninstall-local
+.PHONY: all all-am all-local check check-am check-local clean \
+	clean-generic clean-libtool clean-local cscopelist-am ctags-am \
+	dist-hook distclean distclean-generic distclean-libtool \
+	distclean-local distdir dvi dvi-am html html-am info info-am \
+	install install-am install-data install-data-am \
+	install-data-local install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-man install-pdf install-pdf-am \
+	install-ps install-ps-am install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic maintainer-clean-local mostlyclean \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags-am uninstall uninstall-am uninstall-local
 
 
 gtkdoc-check.test: Makefile
@@ -713,7 +729,7 @@ $(REPORT_FILES): sgml-build.stamp
 
 setup-build.stamp:
 	-$(GTK_DOC_V_SETUP)if test "$(abs_srcdir)" != "$(abs_builddir)" ; then \
-	    files=`echo $(SETUP_FILES) $(expand_content_files) $(DOC_MODULE).types`; \
+	    files=`echo $(SETUP_FILES) $(DOC_MODULE).types`; \
 	    if test "x$$files" != "x" ; then \
 	        for file in $$files ; do \
 	            destdir=`dirname $(abs_builddir)/$$file`; \
@@ -734,7 +750,7 @@ scan-build.stamp: setup-build.stamp $(HFILE_GLOB) $(CFILE_GLOB)
 	$(GTK_DOC_V_INTROSPECT)if grep -l '^..*$$' $(DOC_MODULE).types > /dev/null 2>&1 ; then \
 	    scanobj_options=""; \
 	    gtkdoc-scangobj 2>&1 --help | grep  >/dev/null "\-\-verbose"; \
-	    if test "$(?)" = "0"; then \
+	    if test "$$?" = "0"; then \
 	        if test "x$(V)" = "x1"; then \
 	            scanobj_options="--verbose"; \
 	        fi; \
@@ -751,7 +767,7 @@ scan-build.stamp: setup-build.stamp $(HFILE_GLOB) $(CFILE_GLOB)
 $(DOC_MODULE)-decl.txt $(SCANOBJ_FILES) $(DOC_MODULE)-sections.txt $(DOC_MODULE)-overrides.txt: scan-build.stamp
 	@true
 
-sgml-build.stamp: setup-build.stamp $(DOC_MODULE)-decl.txt $(SCANOBJ_FILES) $(DOC_MODULE)-sections.txt $(DOC_MODULE)-overrides.txt $(expand_content_files)
+sgml-build.stamp: setup-build.stamp $(DOC_MODULE)-decl.txt $(SCANOBJ_FILES) $(HFILE_GLOB) $(CFILE_GLOB) $(DOC_MODULE)-sections.txt $(DOC_MODULE)-overrides.txt $(expand_content_files) xml/gtkdocentities.ent
 	$(GTK_DOC_V_XML)_source_dir='' ; \
 	for i in $(DOC_SOURCE_DIR) ; do \
 	    _source_dir="$${_source_dir} --source-dir=$$i" ; \
@@ -762,17 +778,28 @@ sgml-build.stamp: setup-build.stamp $(DOC_MODULE)-decl.txt $(SCANOBJ_FILES) $(DO
 sgml.stamp: sgml-build.stamp
 	@true
 
-html-build.stamp: sgml.stamp $(DOC_MAIN_SGML_FILE) $(content_files)
+xml/gtkdocentities.ent: Makefile
+	$(GTK_DOC_V_XML)$(MKDIR_P) $(@D) && ( \
+		echo "<!ENTITY package \"$(PACKAGE)\">"; \
+		echo "<!ENTITY package_bugreport \"$(PACKAGE_BUGREPORT)\">"; \
+		echo "<!ENTITY package_name \"$(PACKAGE_NAME)\">"; \
+		echo "<!ENTITY package_string \"$(PACKAGE_STRING)\">"; \
+		echo "<!ENTITY package_tarname \"$(PACKAGE_TARNAME)\">"; \
+		echo "<!ENTITY package_url \"$(PACKAGE_URL)\">"; \
+		echo "<!ENTITY package_version \"$(PACKAGE_VERSION)\">"; \
+	) > $@
+
+html-build.stamp: sgml.stamp $(DOC_MAIN_SGML_FILE) $(content_files) $(expand_content_files)
 	$(GTK_DOC_V_HTML)rm -rf html && mkdir html && \
 	mkhtml_options=""; \
 	gtkdoc-mkhtml 2>&1 --help | grep  >/dev/null "\-\-verbose"; \
-	if test "$(?)" = "0"; then \
+	if test "$$?" = "0"; then \
 	  if test "x$(V)" = "x1"; then \
 	    mkhtml_options="$$mkhtml_options --verbose"; \
 	  fi; \
 	fi; \
 	gtkdoc-mkhtml 2>&1 --help | grep  >/dev/null "\-\-path"; \
-	if test "$(?)" = "0"; then \
+	if test "$$?" = "0"; then \
 	  mkhtml_options="$$mkhtml_options --path=\"$(abs_srcdir)\""; \
 	fi; \
 	cd html && gtkdoc-mkhtml $$mkhtml_options $(MKHTML_OPTIONS) $(DOC_MODULE) ../$(DOC_MAIN_SGML_FILE)
@@ -788,11 +815,11 @@ html-build.stamp: sgml.stamp $(DOC_MAIN_SGML_FILE) $(content_files)
 	$(GTK_DOC_V_XREF)gtkdoc-fixxref --module=$(DOC_MODULE) --module-dir=html --html-dir=$(HTML_DIR) $(FIXXREF_OPTIONS)
 	$(AM_V_at)touch html-build.stamp
 
-pdf-build.stamp: sgml.stamp $(DOC_MAIN_SGML_FILE) $(content_files)
+pdf-build.stamp: sgml.stamp $(DOC_MAIN_SGML_FILE) $(content_files) $(expand_content_files)
 	$(GTK_DOC_V_PDF)rm -f $(DOC_MODULE).pdf && \
 	mkpdf_options=""; \
 	gtkdoc-mkpdf 2>&1 --help | grep  >/dev/null "\-\-verbose"; \
-	if test "$(?)" = "0"; then \
+	if test "$$?" = "0"; then \
 	  if test "x$(V)" = "x1"; then \
 	    mkpdf_options="$$mkpdf_options --verbose"; \
 	  fi; \
@@ -817,12 +844,15 @@ clean-local:
 	@if echo $(SCAN_OPTIONS) | grep -q "\-\-rebuild-types" ; then \
 	  rm -f $(DOC_MODULE).types; \
 	fi
+	@if echo $(SCAN_OPTIONS) | grep -q "\-\-rebuild-sections" ; then \
+	  rm -f $(DOC_MODULE)-sections.txt; \
+	fi
 
 distclean-local:
 	@rm -rf xml html $(REPORT_FILES) $(DOC_MODULE).pdf \
 	    $(DOC_MODULE)-decl-list.txt $(DOC_MODULE)-decl.txt
 	@if test "$(abs_srcdir)" != "$(abs_builddir)" ; then \
-	    rm -f $(SETUP_FILES) $(expand_content_files) $(DOC_MODULE).types; \
+	    rm -f $(SETUP_FILES) $(DOC_MODULE).types; \
 	fi
 
 maintainer-clean-local:
@@ -878,6 +908,9 @@ dist-hook: dist-check-gtkdoc all-gtk-doc dist-hook-local
 	@$(GTKDOC_REBASE) --online --relative --html-dir=$(distdir)/html
 
 .PHONY : dist-hook-local docs
+
+@ENABLE_GTK_DOC_TRUE@check-local: $(GTKDOC_CHECK)
+@ENABLE_GTK_DOC_TRUE@	@$(TESTS_ENVIRONMENT) ./$(GTKDOC_CHECK)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

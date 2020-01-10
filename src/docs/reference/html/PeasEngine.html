@@ -2,22 +2,22 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Peas Reference Manual: PeasEngine</title>
+<title>PeasEngine: Peas Reference Manual</title>
 <meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
 <link rel="home" href="index.html" title="Peas Reference Manual">
 <link rel="up" href="ch01.html" title="Core Classes">
 <link rel="prev" href="ch01.html" title="Core Classes">
 <link rel="next" href="PeasPluginInfo.html" title="PeasPluginInfo">
-<meta name="generator" content="GTK-Doc V1.20 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.25.1 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
-<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="10"><tr valign="middle">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
 <td width="100%" align="left" class="shortcuts">
-<a href="#" class="shortcut">Top</a><span id="nav_description"> <span class="dim">|</span> 
-                  <a href="#PeasEngine.description" class="shortcut">Description</a></span><span id="nav_hierarchy"> <span class="dim">|</span> 
-                  <a href="#PeasEngine.object-hierarchy" class="shortcut">Object Hierarchy</a></span><span id="nav_properties"> <span class="dim">|</span> 
-                  <a href="#PeasEngine.properties" class="shortcut">Properties</a></span><span id="nav_signals"> <span class="dim">|</span> 
+<a href="#" class="shortcut">Top</a><span id="nav_description">  <span class="dim">|</span> 
+                  <a href="#PeasEngine.description" class="shortcut">Description</a></span><span id="nav_hierarchy">  <span class="dim">|</span> 
+                  <a href="#PeasEngine.object-hierarchy" class="shortcut">Object Hierarchy</a></span><span id="nav_properties">  <span class="dim">|</span> 
+                  <a href="#PeasEngine.properties" class="shortcut">Properties</a></span><span id="nav_signals">  <span class="dim">|</span> 
                   <a href="#PeasEngine.signals" class="shortcut">Signals</a></span>
 </td>
 <td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
@@ -48,6 +48,14 @@
 </td>
 <td class="function_name">
 <a class="link" href="PeasEngine.html#peas-engine-new" title="peas_engine_new ()">peas_engine_new</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="PeasEngine.html" title="PeasEngine"><span class="returnvalue">PeasEngine</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="PeasEngine.html#peas-engine-new-with-nonglobal-loaders" title="peas_engine_new_with_nonglobal_loaders ()">peas_engine_new_with_nonglobal_loaders</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
 <tr>
@@ -195,6 +203,11 @@
 <td class="property_flags">Read / Write</td>
 </tr>
 <tr>
+<td class="property_type"><span class="type">gboolean</span></td>
+<td class="property_name"><a class="link" href="PeasEngine.html#PeasEngine--nonglobal-loaders" title="The “nonglobal-loaders” property">nonglobal-loaders</a></td>
+<td class="property_flags">Read / Write / Construct Only</td>
+</tr>
+<tr>
 <td class="property_type"><span class="type">gpointer</span></td>
 <td class="property_name"><a class="link" href="PeasEngine.html#PeasEngine--plugin-list" title="The “plugin-list” property">plugin-list</a></td>
 <td class="property_flags">Read</td>
@@ -271,10 +284,27 @@ If no default <a class="link" href="PeasEngine.html" title="PeasEngine"><span cl
 the first call of this function will set the default
 engine as the new instance of <a class="link" href="PeasEngine.html" title="PeasEngine"><span class="type">PeasEngine</span></a>.</p>
 <div class="refsect3">
-<a name="id-1.2.2.2.9.2.5"></a><h4>Returns</h4>
+<a name="peas-engine-new.returns"></a><h4>Returns</h4>
 <p> a new instance of <a class="link" href="PeasEngine.html" title="PeasEngine"><span class="type">PeasEngine</span></a>.</p>
-<p></p>
 </div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="peas-engine-new-with-nonglobal-loaders"></a><h3>peas_engine_new_with_nonglobal_loaders ()</h3>
+<pre class="programlisting"><a class="link" href="PeasEngine.html" title="PeasEngine"><span class="returnvalue">PeasEngine</span></a> *
+peas_engine_new_with_nonglobal_loaders
+                               (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<p>Return a new instance of <a class="link" href="PeasEngine.html" title="PeasEngine"><span class="type">PeasEngine</span></a> which will use non-global
+plugin loaders instead of the default global ones. This allows
+multiple threads to each have a <a class="link" href="PeasEngine.html" title="PeasEngine"><span class="type">PeasEngine</span></a> and be used without
+internal locking.</p>
+<p>Note: due to CPython's GIL the python and python3
+      plugin loaders are always global.</p>
+<div class="refsect3">
+<a name="peas-engine-new-with-nonglobal-loaders.returns"></a><h4>Returns</h4>
+<p> a new instance of <a class="link" href="PeasEngine.html" title="PeasEngine"><span class="type">PeasEngine</span></a> that uses non-global loaders.</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-1-14.html#api-index-1.14">1.14</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -284,8 +314,10 @@ peas_engine_get_default (<em class="parameter"><code><span class="type">void</sp
 <p>Return the existing instance of <a class="link" href="PeasEngine.html" title="PeasEngine"><span class="type">PeasEngine</span></a> or a subclass of it.
 If no <a class="link" href="PeasEngine.html" title="PeasEngine"><span class="type">PeasEngine</span></a> subclass has been instantiated yet, the first call
 of this function will return a new instance of <a class="link" href="PeasEngine.html" title="PeasEngine"><span class="type">PeasEngine</span></a>.</p>
+<p>Note: this function should never be used when multiple threads are
+      using libpeas API as it is not thread-safe.</p>
 <div class="refsect3">
-<a name="id-1.2.2.2.9.3.5"></a><h4>Returns</h4>
+<a name="peas-engine-get-default.returns"></a><h4>Returns</h4>
 <p> the existing instance of <a class="link" href="PeasEngine.html" title="PeasEngine"><span class="type">PeasEngine</span></a>. </p>
 <p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
 </div>
@@ -313,7 +345,7 @@ without taking other special care than using
 <em class="parameter"><code>module_dir</code></em>
 .</p>
 <div class="refsect3">
-<a name="id-1.2.2.2.9.4.8"></a><h4>Parameters</h4>
+<a name="peas-engine-add-search-path.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -334,7 +366,7 @@ without taking other special care than using
 <tr>
 <td class="parameter_name"><p>data_dir</p></td>
 <td class="parameter_description"><p> the plugin data directory. </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is ok, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -351,7 +383,7 @@ peas_engine_prepend_search_path (<em class="parameter"><code><a class="link" hre
 look for plugins.</p>
 <p>See Also: <a class="link" href="PeasEngine.html#peas-engine-add-search-path" title="peas_engine_add_search_path ()"><code class="function">peas_engine_add_search_path()</code></a></p>
 <div class="refsect3">
-<a name="id-1.2.2.2.9.5.6"></a><h4>Parameters</h4>
+<a name="peas-engine-prepend-search-path.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -372,36 +404,42 @@ look for plugins.</p>
 <tr>
 <td class="parameter_name"><p>data_dir</p></td>
 <td class="parameter_description"><p> the plugin data directory. </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is ok, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
 </div>
-<p class="since">Since 1.6</p>
+<p class="since">Since: <a class="link" href="api-index-1-6.html#api-index-1.6">1.6</a></p>
 </div>
 <hr>
 <div class="refsect2">
 <a name="peas-engine-enable-loader"></a><h3>peas_engine_enable_loader ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 peas_engine_enable_loader (<em class="parameter"><code><a class="link" href="PeasEngine.html" title="PeasEngine"><span class="type">PeasEngine</span></a> *engine</code></em>,
-                           <em class="parameter"><code>const <span class="type">gchar</span> *loader_id</code></em>);</pre>
+                           <em class="parameter"><code>const <span class="type">gchar</span> *loader_name</code></em>);</pre>
 <p>Enable a loader, enables a loader for plugins.
 The C plugin loader is always enabled. The other plugin
-loaders are: python, python3 and seed.</p>
-<p>For instance, the following code will enable python plugins
+loaders are: lua5.1, python and python3.</p>
+<p>For instance, the following code will enable Python 2 plugins
 to be loaded:</p>
-<div class="informalexample"><pre class="programlisting">
-peas_engine_enable_loader (engine, "python");
-</pre></div>
+<div class="informalexample">
+  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td class="listing_lines" align="right"><pre>1</pre></td>
+        <td class="listing_code"><pre class="programlisting">peas_engine_enable_loader (engine, <span class="number">&quot;python&quot;</span>);</pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
 <p></p>
-<p>Due to the use of toggle references in the python, python3 and
-seed bindings only one of them should be enabled. Otherwise vast
-memory leaks are to be expected and as such it is an error to
-enable more than one of them.</p>
-<p>Note: plugin loaders are shared across <a href="PeasEngine.html"><span class="type">PeasEngines</span></a> so enabling
-      a loader on one <a class="link" href="PeasEngine.html" title="PeasEngine"><span class="type">PeasEngine</span></a> will enable it on all <a href="PeasEngine.html"><span class="type">PeasEngines</span></a>.</p>
+<p>Note: plugin loaders used to be shared across <a href="PeasEngine.html#PeasEngine-struct"><span class="type">PeasEngines</span></a> so enabling
+      a loader on one <a class="link" href="PeasEngine.html" title="PeasEngine"><span class="type">PeasEngine</span></a> would enable it on all <a href="PeasEngine.html#PeasEngine-struct"><span class="type">PeasEngines</span></a>.
+      This behavior has been kept to avoid breaking applications,
+      however a warning has been added to help applications transition.</p>
 <div class="refsect3">
-<a name="id-1.2.2.2.9.6.10"></a><h4>Parameters</h4>
+<a name="peas-engine-enable-loader.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -415,8 +453,8 @@ enable more than one of them.</p>
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
-<td class="parameter_name"><p>loader_id</p></td>
-<td class="parameter_description"><p>The id of the loader to enable.</p></td>
+<td class="parameter_name"><p>loader_name</p></td>
+<td class="parameter_description"><p>The name of the loader to enable.</p></td>
 <td class="parameter_annotations"> </td>
 </tr>
 </tbody>
@@ -433,7 +471,7 @@ peas_engine_rescan_plugins (<em class="parameter"><code><a class="link" href="Pe
 be loaded by the engine, so the new plugins can be used without
 restarting the application.</p>
 <div class="refsect3">
-<a name="id-1.2.2.2.9.7.6"></a><h4>Parameters</h4>
+<a name="peas-engine-rescan-plugins.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -455,7 +493,7 @@ restarting the application.</p>
 peas_engine_get_plugin_list (<em class="parameter"><code><a class="link" href="PeasEngine.html" title="PeasEngine"><span class="type">PeasEngine</span></a> *engine</code></em>);</pre>
 <p>Returns the list of <a class="link" href="PeasPluginInfo.html" title="PeasPluginInfo"><span class="type">PeasPluginInfo</span></a> known to the engine.</p>
 <div class="refsect3">
-<a name="id-1.2.2.2.9.8.5"></a><h4>Parameters</h4>
+<a name="peas-engine-get-plugin-list.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -470,7 +508,7 @@ peas_engine_get_plugin_list (<em class="parameter"><code><a class="link" href="P
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.2.9.8.6"></a><h4>Returns</h4>
+<a name="peas-engine-get-plugin-list.returns"></a><h4>Returns</h4>
 <p> a <span class="type">GList</span> of
 <a class="link" href="PeasPluginInfo.html" title="PeasPluginInfo"><span class="type">PeasPluginInfo</span></a>. Note that the list belongs to the engine and should
 not be freed. </p>
@@ -487,7 +525,7 @@ containing a single <code class="literal">NULL</code> element if there is no plu
 <p>Please note that the returned array is a newly allocated one: you will need
 to free it using <code class="function">g_strfreev()</code>.</p>
 <div class="refsect3">
-<a name="id-1.2.2.2.9.9.6"></a><h4>Parameters</h4>
+<a name="peas-engine-get-loaded-plugins.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -502,7 +540,7 @@ to free it using <code class="function">g_strfreev()</code>.</p>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.2.9.9.7"></a><h4>Returns</h4>
+<a name="peas-engine-get-loaded-plugins.returns"></a><h4>Returns</h4>
 <p> A newly-allocated
 <code class="literal">NULL</code>-terminated array of strings. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></p>
@@ -522,7 +560,7 @@ and ensures all other active plugins are unloaded.</p>
 <p>If <em class="parameter"><code>plugin_names</code></em>
  is <code class="literal">NULL</code>, all plugins will be unloaded.</p>
 <div class="refsect3">
-<a name="id-1.2.2.2.9.10.6"></a><h4>Parameters</h4>
+<a name="peas-engine-set-loaded-plugins.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -539,7 +577,7 @@ and ensures all other active plugins are unloaded.</p>
 <td class="parameter_name"><p>plugin_names</p></td>
 <td class="parameter_description"><p> A <code class="literal">NULL</code>-terminated
 array of plugin names, or <code class="literal">NULL</code>. </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is ok, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -556,7 +594,7 @@ peas_engine_get_plugin_info (<em class="parameter"><code><a class="link" href="P
 or <code class="literal">NULL</code> if <em class="parameter"><code>plugin_name</code></em>
  was not found.</p>
 <div class="refsect3">
-<a name="id-1.2.2.2.9.11.5"></a><h4>Parameters</h4>
+<a name="peas-engine-get-plugin-info.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -578,7 +616,7 @@ or <code class="literal">NULL</code> if <em class="parameter"><code>plugin_name<
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.2.9.11.6"></a><h4>Returns</h4>
+<a name="peas-engine-get-plugin-info.returns"></a><h4>Returns</h4>
 <p> the <a class="link" href="PeasPluginInfo.html" title="PeasPluginInfo"><span class="type">PeasPluginInfo</span></a> corresponding with
 a given plugin module name. </p>
 <p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
@@ -594,8 +632,9 @@ peas_engine_load_plugin (<em class="parameter"><code><a class="link" href="PeasE
  if it's not currently loaded.
 Emits the "load-plugin" signal; loading the plugin
 actually occurs in the default signal handler.</p>
+<p><span class="annotation">[<acronym title="This is the invoker for a virtual method."><span class="acronym">virtual</span></acronym> load_plugin]</span></p>
 <div class="refsect3">
-<a name="id-1.2.2.2.9.12.5"></a><h4>Parameters</h4>
+<a name="peas-engine-load-plugin.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -617,9 +656,8 @@ actually occurs in the default signal handler.</p>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.2.9.12.6"></a><h4>Returns</h4>
+<a name="peas-engine-load-plugin.returns"></a><h4>Returns</h4>
 <p> whether the plugin has been successfully loaded.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -632,8 +670,9 @@ peas_engine_unload_plugin (<em class="parameter"><code><a class="link" href="Pea
 .
 Emits the "unload-plugin" signal; unloading the plugin
 actually occurs in the default signal handler.</p>
+<p><span class="annotation">[<acronym title="This is the invoker for a virtual method."><span class="acronym">virtual</span></acronym> unload_plugin]</span></p>
 <div class="refsect3">
-<a name="id-1.2.2.2.9.13.5"></a><h4>Parameters</h4>
+<a name="peas-engine-unload-plugin.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -655,9 +694,8 @@ actually occurs in the default signal handler.</p>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.2.9.13.6"></a><h4>Returns</h4>
+<a name="peas-engine-unload-plugin.returns"></a><h4>Returns</h4>
 <p> whether the plugin has been successfully unloaded.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -670,7 +708,7 @@ owned by the <a class="link" href="PeasEngine.html" title="PeasEngine"><span cla
 managed objects that still hold references to objects that are about to
 disappear.</p>
 <div class="refsect3">
-<a name="id-1.2.2.2.9.14.5"></a><h4>Parameters</h4>
+<a name="peas-engine-garbage-collect.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -698,7 +736,7 @@ peas_engine_provides_extension (<em class="parameter"><code><a class="link" href
 If the <em class="parameter"><code>info</code></em>
  is not loaded than <code class="literal">FALSE</code> will always be returned.</p>
 <div class="refsect3">
-<a name="id-1.2.2.2.9.15.5"></a><h4>Parameters</h4>
+<a name="peas-engine-provides-extension.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -725,11 +763,10 @@ If the <em class="parameter"><code>info</code></em>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.2.9.15.6"></a><h4>Returns</h4>
+<a name="peas-engine-provides-extension.returns"></a><h4>Returns</h4>
 <p> if <em class="parameter"><code>info</code></em>
 provides an extension for <em class="parameter"><code>extension_type</code></em>
 .</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -754,8 +791,9 @@ handler (exactly like if you had called <code class="function">g_object_new()</c
 returned wrapped in a <a class="link" href="libpeas-PeasExtension.html#PeasExtension" title="PeasExtension"><span class="type">PeasExtension</span></a> proxy, following the current libpeas
 principle of never giving you the actual object (also because it might as
 well *not* be an actual object).</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
 <div class="refsect3">
-<a name="id-1.2.2.2.9.16.7"></a><h4>Parameters</h4>
+<a name="peas-engine-create-extension.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -793,11 +831,10 @@ name/value pairs, followed by <code class="literal">NULL</code>.</p></td>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.2.9.16.8"></a><h4>Returns</h4>
+<a name="peas-engine-create-extension.returns"></a><h4>Returns</h4>
 <p> a new instance of <a class="link" href="libpeas-PeasExtension.html#PeasExtension" title="PeasExtension"><span class="type">PeasExtension</span></a> wrapping
 the <em class="parameter"><code>extension_type</code></em>
 instance, or <code class="literal">NULL</code>.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -815,8 +852,9 @@ peas_engine_create_extensionv (<em class="parameter"><code><a class="link" href=
 then this function will return a new instance of this implementation,
 wrapped in a new <a class="link" href="libpeas-PeasExtension.html#PeasExtension" title="PeasExtension"><span class="type">PeasExtension</span></a> instance. Otherwise, it will return <code class="literal">NULL</code>.</p>
 <p>See <a class="link" href="PeasEngine.html#peas-engine-create-extension" title="peas_engine_create_extension ()"><code class="function">peas_engine_create_extension()</code></a> for more information.</p>
+<p><span class="annotation">[<acronym title="Rename the original symbol's name to SYMBOL."><span class="acronym">rename-to</span></acronym> peas_engine_create_extension]</span></p>
 <div class="refsect3">
-<a name="id-1.2.2.2.9.17.6"></a><h4>Parameters</h4>
+<a name="peas-engine-create-extensionv.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -848,13 +886,13 @@ array.</p></td>
 <tr>
 <td class="parameter_name"><p>parameters</p></td>
 <td class="parameter_description"><p>  an array of <span class="type">GParameter</span>. </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is ok, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> length=n_parameters]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> length=n_parameters]</span></td>
 </tr>
 </tbody>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.2.9.17.7"></a><h4>Returns</h4>
+<a name="peas-engine-create-extensionv.returns"></a><h4>Returns</h4>
 <p> a new instance of <a class="link" href="libpeas-PeasExtension.html#PeasExtension" title="PeasExtension"><span class="type">PeasExtension</span></a> wrapping
 the <em class="parameter"><code>extension_type</code></em>
 instance, or <code class="literal">NULL</code>. </p>
@@ -876,8 +914,9 @@ peas_engine_create_extension_valist (<em class="parameter"><code><a class="link"
 then this function will return a new instance of this implementation,
 wrapped in a new <a class="link" href="libpeas-PeasExtension.html#PeasExtension" title="PeasExtension"><span class="type">PeasExtension</span></a> instance. Otherwise, it will return <code class="literal">NULL</code>.</p>
 <p>See <a class="link" href="PeasEngine.html#peas-engine-create-extension" title="peas_engine_create_extension ()"><code class="function">peas_engine_create_extension()</code></a> for more information.</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
 <div class="refsect3">
-<a name="id-1.2.2.2.9.18.6"></a><h4>Parameters</h4>
+<a name="peas-engine-create-extension-valist.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -915,11 +954,10 @@ name/value pairs, followed by <code class="literal">NULL</code>.</p></td>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.2.9.18.7"></a><h4>Returns</h4>
+<a name="peas-engine-create-extension-valist.returns"></a><h4>Returns</h4>
 <p> a new instance of <a class="link" href="libpeas-PeasExtension.html#PeasExtension" title="PeasExtension"><span class="type">PeasExtension</span></a> wrapping
 the <em class="parameter"><code>extension_type</code></em>
 instance, or <code class="literal">NULL</code>.</p>
-<p></p>
 </div>
 </div>
 </div>
@@ -946,7 +984,7 @@ accessed using the provided API.</p>
 </pre>
 <p>Class structure for <a class="link" href="PeasEngine.html" title="PeasEngine"><span class="type">PeasEngine</span></a>.</p>
 <div class="refsect3">
-<a name="id-1.2.2.2.10.3.5"></a><h4>Members</h4>
+<a name="PeasEngineClass.members"></a><h4>Members</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="300px" class="struct_members_name">
@@ -954,11 +992,6 @@ accessed using the provided API.</p>
 <col width="200px" class="struct_members_annotations">
 </colgroup>
 <tbody>
-<tr>
-<td class="struct_member_name"><p><span class="type">GObjectClass</span> <em class="structfield"><code><a name="PeasEngineClass.parent-class"></a>parent_class</code></em>;</p></td>
-<td class="struct_member_description"><p>The parent class.</p></td>
-<td class="struct_member_annotations"> </td>
-</tr>
 <tr>
 <td class="struct_member_name"><p><em class="structfield"><code><a name="PeasEngineClass.load-plugin"></a>load_plugin</code></em> ()</p></td>
 <td class="struct_member_description"><p>Signal class handler for the <a class="link" href="PeasEngine.html#PeasEngine-load-plugin" title="The “load-plugin” signal"><span class="type">“load-plugin”</span></a> signal.</p></td>
@@ -984,16 +1017,38 @@ accessed using the provided API.</p>
 <a class="link" href="PeasEngine.html#peas-engine-unload-plugin" title="peas_engine_unload_plugin ()"><code class="function">peas_engine_unload_plugin()</code></a> is called.</p>
 <p>This can be used with GSettings to save the loaded plugins by binding
 to this property after instantiating the engine by doing:</p>
-<div class="informalexample"><pre class="programlisting">
-  g_settings_bind (gsettings_object,
-                   LOADED_PLUGINS_KEY,
-                   engine,
-                   "loaded-plugins",
-                   G_SETTINGS_BIND_DEFAULT);
-</pre></div>
+<div class="informalexample">
+  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td class="listing_lines" align="right"><pre>1
+2
+3
+4
+5</pre></td>
+        <td class="listing_code"><pre class="programlisting">g_settings_bind (gsettings_object,
+                 LOADED_PLUGINS_KEY,
+                 engine,
+                 <span class="number">&quot;loaded-plugins&quot;</span>,
+                 G_SETTINGS_BIND_DEFAULT);</pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
 <p></p>
 <p>Note: notify will not be called when the engine is being destroyed.</p>
 <p>Flags: Read / Write</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="PeasEngine--nonglobal-loaders"></a><h3>The <code class="literal">“nonglobal-loaders”</code> property</h3>
+<pre class="programlisting">  “nonglobal-loaders”        <span class="type">gboolean</span></pre>
+<p>If non-global plugin loaders should be used.</p>
+<p>See <a class="link" href="PeasEngine.html#peas-engine-new-with-nonglobal-loaders" title="peas_engine_new_with_nonglobal_loaders ()"><code class="function">peas_engine_new_with_nonglobal_loaders()</code></a> for more information.</p>
+<p>Flags: Read / Write / Construct Only</p>
+<p>Default value: FALSE</p>
+<p class="since">Since: <a class="link" href="api-index-1-14.html#api-index-1.14">1.14</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -1001,8 +1056,7 @@ to this property after instantiating the engine by doing:</p>
 <pre class="programlisting">  “plugin-list”              <span class="type">gpointer</span></pre>
 <p>The list of found plugins.</p>
 <p>This will be modified when <a class="link" href="PeasEngine.html#peas-engine-rescan-plugins" title="peas_engine_rescan_plugins ()"><code class="function">peas_engine_rescan_plugins()</code></a> is called.</p>
-<p>Note that the list belongs to the engine and should not be modified
-or freed.</p>
+<p>Note: the list belongs to the engine and should not be modified or freed.</p>
 <p>Flags: Read</p>
 </div>
 </div>
@@ -1021,7 +1075,7 @@ perform some action before the plugin is loaded, you should use
 plugin is loaded (the most common case), you should use
 <code class="function">g_signal_connect_after()</code>.</p>
 <div class="refsect3">
-<a name="id-1.2.2.2.12.2.6"></a><h4>Parameters</h4>
+<a name="PeasEngine-load-plugin.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1063,7 +1117,7 @@ case), you should use <code class="function">g_signal_connect()</code>, but if y
 action after the plugin is unloaded (the most common case), you should
 use <code class="function">g_signal_connect_after()</code>.</p>
 <div class="refsect3">
-<a name="id-1.2.2.2.12.3.6"></a><h4>Parameters</h4>
+<a name="PeasEngine-unload-plugin.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1098,7 +1152,6 @@ use <code class="function">g_signal_connect_after()</code>.</p>
 </div>
 </div>
 <div class="footer">
-<hr>
-          Generated by GTK-Doc V1.20</div>
+<hr>Generated by GTK-Doc V1.25.1</div>
 </body>
 </html>

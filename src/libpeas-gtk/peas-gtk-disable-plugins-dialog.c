@@ -4,19 +4,19 @@
  *
  * Copyright (C) 2011 Garrett Regier
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU Library General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ * libpeas is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ * libpeas is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU Library General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -32,24 +32,27 @@ enum {
   PLUGIN_INFO_NAME_COLUMN = 0
 };
 
-struct _PeasGtkDisablePluginsDialogPrivate {
+typedef struct {
   PeasPluginInfo *plugin_info;
   GList *dep_plugins;
-};
+} PeasGtkDisablePluginsDialogPrivate;
 
 /* Properties */
 enum {
   PROP_0,
   PROP_PLUGIN_INFO,
-  PROP_DEPENDANT_PLUGINS,
+  PROP_DEPENDENT_PLUGINS,
   N_PROPERTIES
 };
 
 static GParamSpec *properties[N_PROPERTIES] = { NULL };
 
-G_DEFINE_TYPE (PeasGtkDisablePluginsDialog,
-               peas_gtk_disable_plugins_dialog,
-               GTK_TYPE_MESSAGE_DIALOG)
+G_DEFINE_TYPE_WITH_PRIVATE (PeasGtkDisablePluginsDialog,
+                            peas_gtk_disable_plugins_dialog,
+                            GTK_TYPE_MESSAGE_DIALOG)
+
+#define GET_PRIV(o) \
+  (peas_gtk_disable_plugins_dialog_get_instance_private (o))
 
 static gint
 model_name_sort_func (GtkListStore *store,
@@ -77,8 +80,9 @@ model_name_sort_func (GtkListStore *store,
 }
 
 static void
-build_multiple_dependant_plugins (PeasGtkDisablePluginsDialog *dialog)
+build_multiple_dependent_plugins (PeasGtkDisablePluginsDialog *dialog)
 {
+  PeasGtkDisablePluginsDialogPrivate *priv = GET_PRIV (dialog);
   gchar *message;
   GtkWidget *message_area;
   GtkWidget *sw;
@@ -96,7 +100,7 @@ build_multiple_dependant_plugins (PeasGtkDisablePluginsDialog *dialog)
 
   gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (dialog),
       _("The following plugins depend on '%s' and will also be disabled:"),
-      peas_plugin_info_get_name (dialog->priv->plugin_info));
+      peas_plugin_info_get_name (priv->plugin_info));
 
   message_area = gtk_message_dialog_get_message_area (GTK_MESSAGE_DIALOG (dialog));
 
@@ -117,7 +121,7 @@ build_multiple_dependant_plugins (PeasGtkDisablePluginsDialog *dialog)
                                         GTK_TREE_SORTABLE_DEFAULT_SORT_COLUMN_ID,
                                         GTK_SORT_ASCENDING);
 
-  for (dep_plugin = dialog->priv->dep_plugins; dep_plugin != NULL;
+  for (dep_plugin = priv->dep_plugins; dep_plugin != NULL;
        dep_plugin = dep_plugin->next)
     {
       PeasPluginInfo *plugin = (PeasPluginInfo *) dep_plugin->data;
@@ -148,8 +152,9 @@ build_multiple_dependant_plugins (PeasGtkDisablePluginsDialog *dialog)
 }
 
 static void
-build_single_dependant_plugin (PeasGtkDisablePluginsDialog *dialog)
+build_single_dependent_plugin (PeasGtkDisablePluginsDialog *dialog)
 {
+  PeasGtkDisablePluginsDialogPrivate *priv = GET_PRIV (dialog);
   gchar *message;
 
   message = g_strconcat ("<span weight=\"bold\" size=\"larger\">",
@@ -162,19 +167,15 @@ build_single_dependant_plugin (PeasGtkDisablePluginsDialog *dialog)
   gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (dialog),
       _("The '%s' plugin depends on the '%s' plugin.\n"
         "If you disable '%s', '%s' will also be disabled."),
-      peas_plugin_info_get_name (dialog->priv->plugin_info),
-      peas_plugin_info_get_name (dialog->priv->dep_plugins->data),
-      peas_plugin_info_get_name (dialog->priv->plugin_info),
-      peas_plugin_info_get_name (dialog->priv->dep_plugins->data));
+      peas_plugin_info_get_name (priv->plugin_info),
+      peas_plugin_info_get_name (priv->dep_plugins->data),
+      peas_plugin_info_get_name (priv->plugin_info),
+      peas_plugin_info_get_name (priv->dep_plugins->data));
 }
 
 static void
 peas_gtk_disable_plugins_dialog_init (PeasGtkDisablePluginsDialog *dialog)
 {
-  dialog->priv = G_TYPE_INSTANCE_GET_PRIVATE (dialog,
-                                              PEAS_GTK_TYPE_DISABLE_PLUGINS_DIALOG,
-                                              PeasGtkDisablePluginsDialogPrivate);
-
   gtk_window_set_modal (GTK_WINDOW (dialog), TRUE);
 
   gtk_dialog_add_button (GTK_DIALOG (dialog),
@@ -190,14 +191,15 @@ peas_gtk_disable_plugins_dialog_set_property (GObject      *object,
                                               GParamSpec   *pspec)
 {
   PeasGtkDisablePluginsDialog *dialog = PEAS_GTK_DISABLE_PLUGINS_DIALOG (object);
+  PeasGtkDisablePluginsDialogPrivate *priv = GET_PRIV (dialog);
 
   switch (prop_id)
     {
     case PROP_PLUGIN_INFO:
-      dialog->priv->plugin_info = g_value_get_pointer (value);
+      priv->plugin_info = g_value_get_pointer (value);
       break;
-    case PROP_DEPENDANT_PLUGINS:
-      dialog->priv->dep_plugins = g_value_get_pointer (value);
+    case PROP_DEPENDENT_PLUGINS:
+      priv->dep_plugins = g_value_get_pointer (value);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -212,14 +214,15 @@ peas_gtk_disable_plugins_dialog_get_property (GObject    *object,
                                               GParamSpec *pspec)
 {
   PeasGtkDisablePluginsDialog *dialog = PEAS_GTK_DISABLE_PLUGINS_DIALOG (object);
+  PeasGtkDisablePluginsDialogPrivate *priv = GET_PRIV (dialog);
 
   switch (prop_id)
     {
     case PROP_PLUGIN_INFO:
-      g_value_set_pointer (value, dialog->priv->plugin_info);
+      g_value_set_pointer (value, priv->plugin_info);
       break;
-    case PROP_DEPENDANT_PLUGINS:
-      g_value_set_pointer (value, dialog->priv->dep_plugins);
+    case PROP_DEPENDENT_PLUGINS:
+      g_value_set_pointer (value, priv->dep_plugins);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -231,11 +234,12 @@ static void
 peas_gtk_disable_plugins_dialog_constructed (GObject *object)
 {
   PeasGtkDisablePluginsDialog *dialog = PEAS_GTK_DISABLE_PLUGINS_DIALOG (object);
+  PeasGtkDisablePluginsDialogPrivate *priv = GET_PRIV (dialog);
 
-  if (dialog->priv->dep_plugins->next == NULL)
-    build_single_dependant_plugin (dialog);
+  if (priv->dep_plugins->next == NULL)
+    build_single_dependent_plugin (dialog);
   else
-    build_multiple_dependant_plugins (dialog);
+    build_multiple_dependent_plugins (dialog);
 
   G_OBJECT_CLASS (peas_gtk_disable_plugins_dialog_parent_class)->constructed (object);
 }
@@ -244,8 +248,9 @@ static void
 peas_gtk_disable_plugins_dialog_finalize (GObject *object)
 {
   PeasGtkDisablePluginsDialog *dialog = PEAS_GTK_DISABLE_PLUGINS_DIALOG (object);
+  PeasGtkDisablePluginsDialogPrivate *priv = GET_PRIV (dialog);
 
-  g_list_free (dialog->priv->dep_plugins);
+  g_list_free (priv->dep_plugins);
 
   G_OBJECT_CLASS (peas_gtk_disable_plugins_dialog_parent_class)->finalize (object);
 }
@@ -268,8 +273,8 @@ peas_gtk_disable_plugins_dialog_class_init (PeasGtkDisablePluginsDialogClass *kl
                         G_PARAM_CONSTRUCT_ONLY |
                         G_PARAM_STATIC_STRINGS);
 
-  properties[PROP_DEPENDANT_PLUGINS] =
-    g_param_spec_pointer ("dependant-plugins",
+  properties[PROP_DEPENDENT_PLUGINS] =
+    g_param_spec_pointer ("dependent-plugins",
                           "Dependant plugins",
                           "Dependant plugins",
                           G_PARAM_READWRITE |
@@ -277,7 +282,6 @@ peas_gtk_disable_plugins_dialog_class_init (PeasGtkDisablePluginsDialogClass *kl
                           G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, N_PROPERTIES, properties);
-  g_type_class_add_private (object_class, sizeof (PeasGtkDisablePluginsDialogPrivate));
 }
 
 /*
@@ -285,7 +289,7 @@ peas_gtk_disable_plugins_dialog_class_init (PeasGtkDisablePluginsDialogClass *kl
  * @parent: transient window.
  * @info: the #PeasPluginInfo being disabled.
  * @dep_plugins: (transfer container) (element-type Peas.PluginInfo):
- *  list of plugins that are dependant on @info.
+ *  list of plugins that are dependent on @info.
  *
  * Creates a new #PeasGtkDisablePluginsDialog.
  *
@@ -299,7 +303,7 @@ peas_gtk_disable_plugins_dialog_new (GtkWindow      *parent,
   return GTK_WIDGET (g_object_new (PEAS_GTK_TYPE_DISABLE_PLUGINS_DIALOG,
                                    "transient-for", parent,
                                    "plugin-info", info,
-                                   "dependant-plugins", dep_plugins,
+                                   "dependent-plugins", dep_plugins,
                                    "message-type", GTK_MESSAGE_QUESTION,
                                    NULL));
 }

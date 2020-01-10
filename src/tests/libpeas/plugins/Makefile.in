@@ -79,9 +79,9 @@ build_triplet = @build@
 host_triplet = @host@
 DIST_COMMON = $(top_srcdir)/tests/Makefile.plugin \
 	$(srcdir)/Makefile.in $(srcdir)/Makefile.am
-@ENABLE_PYTHON3_TRUE@am__append_1 = extension-python
-@ENABLE_PYTHON2_TRUE@@ENABLE_PYTHON3_FALSE@am__append_2 = extension-python
-@ENABLE_SEED_TRUE@am__append_3 = extension-seed
+@ENABLE_LUA51_TRUE@am__append_1 = extension-lua
+@ENABLE_PYTHON3_TRUE@am__append_2 = extension-python
+@ENABLE_PYTHON2_TRUE@@ENABLE_PYTHON3_FALSE@am__append_3 = extension-python
 subdir = tests/libpeas/plugins
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/gtk-doc.m4 \
@@ -149,7 +149,7 @@ am__define_uniq_tagged_files = \
   done | $(am__uniquify_input)`
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = extension-c extension-python extension-seed
+DIST_SUBDIRS = embedded extension-c extension-lua extension-python
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 am__relativize = \
   dir0=`pwd`; \
@@ -212,6 +212,7 @@ GLADE_CATALOG_DIR = @GLADE_CATALOG_DIR@
 GLIB_COMPILE_RESOURCES = @GLIB_COMPILE_RESOURCES@
 GLIB_GENMARSHAL = @GLIB_GENMARSHAL@
 GLIB_MKENUMS = @GLIB_MKENUMS@
+GLIB_PREFIX = @GLIB_PREFIX@
 GLIB_REQUIRED = @GLIB_REQUIRED@
 GMSGFMT = @GMSGFMT@
 GREP = @GREP@
@@ -221,6 +222,7 @@ GTKDOC_DEPS_CFLAGS = @GTKDOC_DEPS_CFLAGS@
 GTKDOC_DEPS_LIBS = @GTKDOC_DEPS_LIBS@
 GTKDOC_MKPDF = @GTKDOC_MKPDF@
 GTKDOC_REBASE = @GTKDOC_REBASE@
+GTK_PREFIX = @GTK_PREFIX@
 GTK_REQUIRED = @GTK_REQUIRED@
 HTML_DIR = @HTML_DIR@
 INSTALL = @INSTALL@
@@ -257,6 +259,9 @@ LTLIBOBJS = @LTLIBOBJS@
 LT_AGE = @LT_AGE@
 LT_CURRENT = @LT_CURRENT@
 LT_REVISION = @LT_REVISION@
+LUA51_BIN = @LUA51_BIN@
+LUA51_CFLAGS = @LUA51_CFLAGS@
+LUA51_LIBS = @LUA51_LIBS@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
@@ -293,24 +298,22 @@ PYGOBJECT_CFLAGS = @PYGOBJECT_CFLAGS@
 PYGOBJECT_LIBS = @PYGOBJECT_LIBS@
 PYTHON = @PYTHON@
 PYTHON2 = @PYTHON2@
+PYTHON2_BIN = @PYTHON2_BIN@
 PYTHON2_CFLAGS = @PYTHON2_CFLAGS@
 PYTHON2_CONFIG = @PYTHON2_CONFIG@
 PYTHON2_LDFLAGS = @PYTHON2_LDFLAGS@
 PYTHON2_LIBS = @PYTHON2_LIBS@
-PYTHON2_PYEXECDIR = @PYTHON2_PYEXECDIR@
+PYTHON3_BIN = @PYTHON3_BIN@
 PYTHON3_CFLAGS = @PYTHON3_CFLAGS@
 PYTHON3_CONFIG = @PYTHON3_CONFIG@
 PYTHON3_LDFLAGS = @PYTHON3_LDFLAGS@
 PYTHON3_LIBS = @PYTHON3_LIBS@
-PYTHON3_PYEXECDIR = @PYTHON3_PYEXECDIR@
 PYTHON_EXEC_PREFIX = @PYTHON_EXEC_PREFIX@
 PYTHON_PLATFORM = @PYTHON_PLATFORM@
 PYTHON_PREFIX = @PYTHON_PREFIX@
 PYTHON_VERSION = @PYTHON_VERSION@
 RANLIB = @RANLIB@
 SED = @SED@
-SEED_CFLAGS = @SEED_CFLAGS@
-SEED_LIBS = @SEED_LIBS@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -381,21 +384,21 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = extension-c $(am__append_1) $(am__append_2) $(am__append_3)
+SUBDIRS = embedded extension-c $(am__append_1) $(am__append_2) \
+	$(am__append_3)
 noinst_PLUGIN = \
-	disabled-loader.plugin			\
 	extension-c-nonexistent.plugin		\
+	extension-lua51-nonexistent.plugin	\
 	extension-python-nonexistent.plugin	\
 	extension-python3-nonexistent.plugin	\
-	extension-seed-nonexistent.plugin	\
 	info-missing-module.plugin		\
 	info-missing-name.plugin		\
 	invalid.plugin				\
-	invalid-loader.plugin			\
 	nonexistent-dep.plugin			\
-	nonexistent-loader.plugin		\
 	not-loadable.plugin			\
-	os-dependant-help.plugin
+	os-dependant-help.plugin		\
+	two-deps.plugin				\
+	unkown-loader.plugin
 
 EXTRA_DIST = $(noinst_PLUGIN)
 all: all-recursive

@@ -136,11 +136,9 @@ am__objects_1 =
 am__objects_2 = peas-marshal.lo
 am__objects_3 = peas-activatable.lo peas-debug.lo peas-dirs.lo \
 	peas-engine.lo peas-extension.lo peas-extension-base.lo \
-	peas-extension-set.lo peas-extension-wrapper.lo \
-	peas-extension-subclasses.lo peas-helpers.lo peas-i18n.lo \
-	peas-introspection.lo peas-object-module.lo \
-	peas-plugin-info.lo peas-plugin-loader.lo \
-	peas-plugin-loader-c.lo
+	peas-extension-set.lo peas-i18n.lo peas-introspection.lo \
+	peas-object-module.lo peas-plugin-info.lo \
+	peas-plugin-loader.lo peas-plugin-loader-c.lo peas-utils.lo
 am_libpeas_1_0_la_OBJECTS = $(am__objects_1) $(am__objects_1) \
 	$(am__objects_2) $(am__objects_3)
 libpeas_1_0_la_OBJECTS = $(am_libpeas_1_0_la_OBJECTS)
@@ -250,6 +248,7 @@ GLADE_CATALOG_DIR = @GLADE_CATALOG_DIR@
 GLIB_COMPILE_RESOURCES = @GLIB_COMPILE_RESOURCES@
 GLIB_GENMARSHAL = @GLIB_GENMARSHAL@
 GLIB_MKENUMS = @GLIB_MKENUMS@
+GLIB_PREFIX = @GLIB_PREFIX@
 GLIB_REQUIRED = @GLIB_REQUIRED@
 GMSGFMT = @GMSGFMT@
 GREP = @GREP@
@@ -259,6 +258,7 @@ GTKDOC_DEPS_CFLAGS = @GTKDOC_DEPS_CFLAGS@
 GTKDOC_DEPS_LIBS = @GTKDOC_DEPS_LIBS@
 GTKDOC_MKPDF = @GTKDOC_MKPDF@
 GTKDOC_REBASE = @GTKDOC_REBASE@
+GTK_PREFIX = @GTK_PREFIX@
 GTK_REQUIRED = @GTK_REQUIRED@
 HTML_DIR = @HTML_DIR@
 INSTALL = @INSTALL@
@@ -295,6 +295,9 @@ LTLIBOBJS = @LTLIBOBJS@
 LT_AGE = @LT_AGE@
 LT_CURRENT = @LT_CURRENT@
 LT_REVISION = @LT_REVISION@
+LUA51_BIN = @LUA51_BIN@
+LUA51_CFLAGS = @LUA51_CFLAGS@
+LUA51_LIBS = @LUA51_LIBS@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
@@ -331,24 +334,22 @@ PYGOBJECT_CFLAGS = @PYGOBJECT_CFLAGS@
 PYGOBJECT_LIBS = @PYGOBJECT_LIBS@
 PYTHON = @PYTHON@
 PYTHON2 = @PYTHON2@
+PYTHON2_BIN = @PYTHON2_BIN@
 PYTHON2_CFLAGS = @PYTHON2_CFLAGS@
 PYTHON2_CONFIG = @PYTHON2_CONFIG@
 PYTHON2_LDFLAGS = @PYTHON2_LDFLAGS@
 PYTHON2_LIBS = @PYTHON2_LIBS@
-PYTHON2_PYEXECDIR = @PYTHON2_PYEXECDIR@
+PYTHON3_BIN = @PYTHON3_BIN@
 PYTHON3_CFLAGS = @PYTHON3_CFLAGS@
 PYTHON3_CONFIG = @PYTHON3_CONFIG@
 PYTHON3_LDFLAGS = @PYTHON3_LDFLAGS@
 PYTHON3_LIBS = @PYTHON3_LIBS@
-PYTHON3_PYEXECDIR = @PYTHON3_PYEXECDIR@
 PYTHON_EXEC_PREFIX = @PYTHON_EXEC_PREFIX@
 PYTHON_PLATFORM = @PYTHON_PLATFORM@
 PYTHON_PREFIX = @PYTHON_PREFIX@
 PYTHON_VERSION = @PYTHON_VERSION@
 RANLIB = @RANLIB@
 SED = @SED@
-SEED_CFLAGS = @SEED_CFLAGS@
-SEED_LIBS = @SEED_LIBS@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -429,6 +430,7 @@ libpeas_1_0_la_LDFLAGS = $(GCOV_LDFLAGS) -version-info \
 	-no-undefined -export-symbols-regex "^[^_].*" $(am__append_2)
 libpeas_1_0_la_LIBADD = $(PEAS_LIBS)
 INST_H_FILES = \
+	peas-autocleanups.h	\
 	peas-plugin-info.h	\
 	peas-object-module.h	\
 	peas-extension-base.h	\
@@ -442,14 +444,12 @@ NOINST_H_FILES = \
 	peas-debug.h			\
 	peas-dirs.h			\
 	peas-engine-priv.h		\
-	peas-extension-wrapper.h	\
-	peas-extension-subclasses.h	\
-	peas-helpers.h			\
 	peas-i18n.h			\
 	peas-introspection.h		\
 	peas-plugin-info-priv.h		\
 	peas-plugin-loader.h		\
-	peas-plugin-loader-c.h
+	peas-plugin-loader-c.h		\
+	peas-utils.h
 
 C_FILES = \
 	peas-activatable.c		\
@@ -459,15 +459,13 @@ C_FILES = \
 	peas-extension.c		\
 	peas-extension-base.c		\
 	peas-extension-set.c		\
-	peas-extension-wrapper.c	\
-	peas-extension-subclasses.c	\
-	peas-helpers.c			\
 	peas-i18n.c			\
 	peas-introspection.c		\
 	peas-object-module.c		\
 	peas-plugin-info.c		\
 	peas-plugin-loader.c		\
-	peas-plugin-loader-c.c
+	peas-plugin-loader-c.c		\
+	peas-utils.c
 
 BUILT_SOURCES = \
 	peas-marshal.c			\
@@ -587,10 +585,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/peas-engine.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/peas-extension-base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/peas-extension-set.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/peas-extension-subclasses.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/peas-extension-wrapper.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/peas-extension.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/peas-helpers.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/peas-i18n.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/peas-introspection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/peas-marshal.Plo@am__quote@
@@ -598,6 +593,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/peas-plugin-info.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/peas-plugin-loader-c.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/peas-plugin-loader.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/peas-utils.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

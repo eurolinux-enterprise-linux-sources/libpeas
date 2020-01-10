@@ -1,15 +1,15 @@
 SUBDIRS =
 
+if ENABLE_LUA51
+SUBDIRS += lua5.1
+endif
+
 if ENABLE_PYTHON2
 SUBDIRS += python
 endif
 
 if ENABLE_PYTHON3
 SUBDIRS += python3
-endif
-
-if ENABLE_SEED
-SUBDIRS += seed
 endif
 
 gcov:

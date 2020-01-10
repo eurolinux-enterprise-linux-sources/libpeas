@@ -1,76 +1,89 @@
 %if 0%{?rhel} == 0
-%global use_seed 1
-%global seed_option --enable-seed
-%else
-%global use_seed 0
-%global seed_option --disable-seed
-%endif
-
-%if 0%{?rhel} == 0
 %global use_python3 1
 %else
 %global use_python3 0
 %endif
 
-Name:		libpeas
-Version:	1.12.1
-Release:	2%{?dist}
-Summary:	Plug-ins implementation convenience library
+%global apiver 1.0
 
-Group:		System Environment/Libraries
-License:	LGPLv2+
-URL:		http://ftp.acc.umu.se/pub/GNOME/sources/libpeas/
-Source0:	http://ftp.acc.umu.se/pub/GNOME/sources/%{name}/1.12/%{name}-%{version}.tar.xz
+Name:           libpeas
+Version:        1.20.0
+Release:        1%{?dist}
+Summary:        Plug-ins implementation convenience library
 
-BuildRequires:	chrpath
-BuildRequires:	gtk3-devel >= 3.0.0
-BuildRequires:	pygobject3-devel
-BuildRequires:	python-devel
+License:        LGPLv2+
+URL:            https://wiki.gnome.org/Projects/Libpeas
+Source0:        https://download.gnome.org/sources/%{name}/1.20/%{name}-%{version}.tar.xz
+
+BuildRequires:  chrpath
+BuildRequires:  gcc
+BuildRequires:  intltool
+BuildRequires:  make
+BuildRequires:  pkgconfig(gio-2.0)
+BuildRequires:  pkgconfig(gladeui-2.0)
+BuildRequires:  pkgconfig(glib-2.0)
+BuildRequires:  pkgconfig(gmodule-2.0)
+BuildRequires:  pkgconfig(gobject-2.0)
+BuildRequires:  pkgconfig(gobject-introspection-1.0)
+BuildRequires:  pkgconfig(gtk+-3.0)
+BuildRequires:  pkgconfig(pygobject-3.0)
+BuildRequires:  python2-devel
 %if %{use_python3}
-BuildRequires:	python3-devel
+BuildRequires:  python3-devel
 %endif
-BuildRequires:	intltool
-BuildRequires:	libtool
-%if %{use_seed}
-BuildRequires:	seed-devel
-%endif
-BuildRequires:	gtk-doc
-BuildRequires:	glade-devel
-
-BuildRequires:	autoconf automake gnome-common
-
-Patch0: libpeas-1.12.1-EL7.3_translations.patch
-
-# For the girepository-1.0 directory
-Requires:	gobject-introspection%{?_isa}
 
 %description
 libpeas is a convenience library making adding plug-ins support
-to GTK+ and glib-based applications.
+to glib-based applications.
+
+%package gtk
+Summary:        GTK+ plug-ins support for libpeas
+Requires:       %{name}%{?_isa} = %{version}-%{release}
+
+%description gtk
+libpeas-gtk is a convenience library making adding plug-ins support
+to GTK+-based applications.
+
+%package loader-python
+Summary:        Python 2 loader for libpeas
+Requires:       %{name}%{?_isa} = %{version}-%{release}
+Requires:       python-gobject
+
+%description loader-python
+This package contains the Python 2 loader that is needed to
+run Python 2 plugins that use libpeas.
+
+%if %{use_python3}
+%package loader-python3
+Summary:        Python 3 loader for libpeas
+Requires:       %{name}%{?_isa} = %{version}-%{release}
+Requires:       python3-gobject
+
+%description loader-python3
+This package contains the Python 3 loader that is needed to
+run Python 3 plugins that use libpeas.
+%endif
 
 %package devel
-Summary:	Development files for libpeas
-Group:		Development/Libraries
-Requires:	%{name}%{?_isa} = %{version}-%{release}
+Summary:        Development files for libpeas
+Requires:       %{name}%{?_isa} = %{version}-%{release}
+Requires:       %{name}-gtk%{?_isa} = %{version}-%{release}
 
 %description devel
 This package contains development libraries and header files
 that are needed to write applications that use libpeas.
 
 %prep
-%setup -q
-%patch0 -p1
+%autosetup
 
 %build
-%configure %{seed_option}
-
-make %{?_smp_mflags}
+%configure --disable-silent-rules
+%make_build
 
 %install
-make install DESTDIR=$RPM_BUILD_ROOT
+%make_install
 
-rm $RPM_BUILD_ROOT/%{_libdir}/lib*.la	\
-	$RPM_BUILD_ROOT/%{_libdir}/libpeas-1.0/loaders/lib*.la
+find $RPM_BUILD_ROOT%{_libdir} -type f -name '*.la' -print -delete
 
 # Remove rpath as per https://fedoraproject.org/wiki/Packaging/Guidelines#Beware_of_Rpath
 chrpath --delete $RPM_BUILD_ROOT%{_bindir}/peas-demo
@@ -78,9 +91,6 @@ chrpath --delete $RPM_BUILD_ROOT%{_bindir}/peas-demo
 chrpath --delete $RPM_BUILD_ROOT%{_libdir}/libpeas-1.0/loaders/libpython3loader.so
 %endif
 chrpath --delete $RPM_BUILD_ROOT%{_libdir}/libpeas-1.0/loaders/libpythonloader.so
-%if %{use_seed}
-chrpath --delete $RPM_BUILD_ROOT%{_libdir}/libpeas-1.0/loaders/libseedloader.so
-%endif
 chrpath --delete $RPM_BUILD_ROOT%{_libdir}/libpeas-gtk-1.0.so
 chrpath --delete $RPM_BUILD_ROOT%{_libdir}/peas-demo/plugins/helloworld/libhelloworld.so
 chrpath --delete $RPM_BUILD_ROOT%{_libdir}/peas-demo/plugins/secondtime/libsecondtime.so
@@ -102,33 +112,48 @@ fi
 gtk-update-icon-cache %{_datadir}/icons/hicolor >&/dev/null || :
 
 %files -f libpeas.lang
-%doc AUTHORS
-%{_libdir}/libpeas*-1.0.so.*
-%dir %{_libdir}/libpeas-1.0/
-%dir %{_libdir}/libpeas-1.0/loaders
-%{_libdir}/libpeas-1.0/loaders/libpythonloader.so
-%if %{use_python3}
-%{_libdir}/libpeas-1.0/loaders/libpython3loader.so
-%endif
-%if %{use_seed}
-%{_libdir}/libpeas-1.0/loaders/libseedloader.so
-%endif
-%{_libdir}/girepository-1.0/*.typelib
+%doc AUTHORS NEWS README
+%license COPYING
+%{_libdir}/libpeas-%{apiver}.so.*
+%dir %{_libdir}/libpeas-%{apiver}/
+%dir %{_libdir}/libpeas-%{apiver}/loaders
+%dir %{_libdir}/girepository-1.0
+%{_libdir}/girepository-1.0/Peas-%{apiver}.typelib
 %{_datadir}/icons/hicolor/*/actions/libpeas-plugin.*
+
+%files gtk
+%{_libdir}/libpeas-gtk-%{apiver}.so.*
+%{_libdir}/girepository-1.0/PeasGtk-%{apiver}.typelib
+
+%files loader-python
+%{_libdir}/libpeas-%{apiver}/loaders/libpythonloader.so
+
+%if %{use_python3}
+%files loader-python3
+%{_libdir}/libpeas-%{apiver}/loaders/libpython3loader.so
+%endif
 
 %files devel
 %{_bindir}/peas-demo
-%{_includedir}/libpeas-1.0/
+%{_includedir}/libpeas-%{apiver}/
 %{_libdir}/peas-demo/
 %dir %{_datadir}/gtk-doc/
 %dir %{_datadir}/gtk-doc/html/
 %{_datadir}/gtk-doc/html/libpeas/
-%{_libdir}/libpeas*-1.0.so
-%{_datadir}/gir-1.0/*.gir
-%{_libdir}/pkgconfig/*.pc
+%{_libdir}/libpeas-%{apiver}.so
+%{_libdir}/libpeas-gtk-%{apiver}.so
+%dir %{_datadir}/gir-1.0
+%{_datadir}/gir-1.0/Peas-%{apiver}.gir
+%{_datadir}/gir-1.0/PeasGtk-%{apiver}.gir
+%{_libdir}/pkgconfig/libpeas-%{apiver}.pc
+%{_libdir}/pkgconfig/libpeas-gtk-%{apiver}.pc
 %{_datadir}/glade/catalogs/libpeas-gtk.xml
 
 %changelog
+* Mon Sep 19 2016 Kalev Lember <klember@redhat.com> - 1.20.0-1
+- Update to 1.20.0
+- Resolves: #1387015
+
 * Thu Jun 30 2016 Bastien Nocera <bnocera@redhat.com> - 1.12.1-2
 - Update translations
 Resolves: #1304243

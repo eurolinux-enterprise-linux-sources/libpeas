@@ -2,20 +2,20 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Peas Reference Manual: PeasPluginInfo</title>
+<title>PeasPluginInfo: Peas Reference Manual</title>
 <meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
 <link rel="home" href="index.html" title="Peas Reference Manual">
 <link rel="up" href="ch01.html" title="Core Classes">
 <link rel="prev" href="PeasEngine.html" title="PeasEngine">
 <link rel="next" href="libpeas-PeasExtension.html" title="PeasExtension">
-<meta name="generator" content="GTK-Doc V1.20 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.25.1 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
-<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="10"><tr valign="middle">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
 <td width="100%" align="left" class="shortcuts">
-<a href="#" class="shortcut">Top</a><span id="nav_description"> <span class="dim">|</span> 
-                  <a href="#PeasPluginInfo.description" class="shortcut">Description</a></span><span id="nav_hierarchy"> <span class="dim">|</span> 
+<a href="#" class="shortcut">Top</a><span id="nav_description">  <span class="dim">|</span> 
+                  <a href="#PeasPluginInfo.description" class="shortcut">Description</a></span><span id="nav_hierarchy">  <span class="dim">|</span> 
                   <a href="#PeasPluginInfo.object-hierarchy" class="shortcut">Object Hierarchy</a></span>
 </td>
 <td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
@@ -203,7 +203,7 @@
 </div>
 <div class="refsect1">
 <a name="PeasPluginInfo.object-hierarchy"></a><h2>Object Hierarchy</h2>
-<pre class="screen">    GBoxed
+<pre class="screen">    <a href="/opt/gnome/share/gtk-doc/html/gobject/gobject-Boxed-Types.html">GBoxed</a>
     <span class="lineart">╰──</span> PeasPluginInfo
 </pre>
 </div>
@@ -213,16 +213,37 @@
 <p>All this information comes from the related plugin info file, whose file
 extension is ".plugin". Here is an example of such a plugin file, in the
 <span class="type">GKeyFile</span> format:</p>
-<div class="informalexample"><pre class="programlisting">
-[Plugin]
+<div class="informalexample">
+  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td class="listing_lines" align="right"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre></td>
+        <td class="listing_code"><pre class="programlisting">[Plugin]
 Module=helloworld
+Depends=foo;bar;baz
+Loader=python3
 Name=Hello World
-Description=Displays "Hello World"
+Description=Displays <span class="number">&quot;Hello World&quot;</span>
 Authors=Steve Frécinaux &lt;code@istique.net&gt;
-Copyright=Copyright © 2009-10 Steve Frécinaux
-Website=http://live.gnome.org/Libpeas
-Help=http://library.gnome.org/devel/libpeas/unstable/
-</pre></div>
+Copyright=Copyright © <span class="number">2009</span>-<span class="number">10</span> Steve Frécinaux
+Website=https:<span class="comment">//wiki.gnome.org/Projects/Libpeas</span>
+Help=http:<span class="comment">//library.gnome.org/devel/libpeas/stable/</span>
+Hidden=<span class="number">false</span></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
 <p></p>
 </div>
 <div class="refsect1">
@@ -233,7 +254,7 @@ Help=http://library.gnome.org/devel/libpeas/unstable/
 peas_plugin_info_is_loaded (<em class="parameter"><code>const <a class="link" href="PeasPluginInfo.html" title="PeasPluginInfo"><span class="type">PeasPluginInfo</span></a> *info</code></em>);</pre>
 <p>Check if the plugin is loaded.</p>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.2.5"></a><h4>Parameters</h4>
+<a name="peas-plugin-info-is-loaded.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -248,9 +269,8 @@ peas_plugin_info_is_loaded (<em class="parameter"><code>const <a class="link" hr
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.2.6"></a><h4>Returns</h4>
+<a name="peas-plugin-info-is-loaded.returns"></a><h4>Returns</h4>
 <p> <code class="literal">TRUE</code> if the plugin is loaded.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -265,7 +285,7 @@ load it, or when there has been an error when trying to load it previously.
 If not available then <em class="parameter"><code>error</code></em>
  will be set.</p>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.3.6"></a><h4>Parameters</h4>
+<a name="peas-plugin-info-is-available.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -287,9 +307,8 @@ If not available then <em class="parameter"><code>error</code></em>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.3.7"></a><h4>Returns</h4>
+<a name="peas-plugin-info-is-available.returns"></a><h4>Returns</h4>
 <p> <code class="literal">TRUE</code> if the plugin is available.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -305,7 +324,7 @@ Most applications will usually load those plugins immediately after
 the initialization of the <a class="link" href="PeasEngine.html" title="PeasEngine"><span class="type">PeasEngine</span></a>.</p>
 <p>The relevant key in the plugin info file is "Builtin".</p>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.4.7"></a><h4>Parameters</h4>
+<a name="peas-plugin-info-is-builtin.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -320,10 +339,9 @@ the initialization of the <a class="link" href="PeasEngine.html" title="PeasEngi
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.4.8"></a><h4>Returns</h4>
+<a name="peas-plugin-info-is-builtin.returns"></a><h4>Returns</h4>
 <p> <code class="literal">TRUE</code> if the plugin is a builtin plugin, <code class="literal">FALSE</code>
 if not.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -338,7 +356,7 @@ unloading such plugins is the responsibility of the application alone or
 through plugins that depend on them.</p>
 <p>The relevant key in the plugin info file is "Hidden".</p>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.5.7"></a><h4>Parameters</h4>
+<a name="peas-plugin-info-is-hidden.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -353,10 +371,9 @@ through plugins that depend on them.</p>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.5.8"></a><h4>Returns</h4>
+<a name="peas-plugin-info-is-hidden.returns"></a><h4>Returns</h4>
 <p> <code class="literal">TRUE</code> if the plugin is a hidden plugin, <code class="literal">FALSE</code>
 if not.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -370,7 +387,7 @@ will be used depends on the loader (i.e. on the language) of the plugin.
 This value is also used to uniquely identify a particular plugin.</p>
 <p>The relevant key in the plugin info file is "Module".</p>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.6.7"></a><h4>Parameters</h4>
+<a name="peas-plugin-info-get-module-name.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -385,9 +402,8 @@ This value is also used to uniquely identify a particular plugin.</p>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.6.8"></a><h4>Returns</h4>
+<a name="peas-plugin-info-get-module-name.returns"></a><h4>Returns</h4>
 <p> the module name.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -400,7 +416,7 @@ peas_plugin_info_get_module_dir (<em class="parameter"><code>const <a class="lin
 is not a value from the <span class="type">GKeyFile</span>, but rather a value provided by the
 <a class="link" href="PeasEngine.html" title="PeasEngine"><span class="type">PeasEngine</span></a>.</p>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.7.6"></a><h4>Parameters</h4>
+<a name="peas-plugin-info-get-module-dir.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -415,9 +431,8 @@ is not a value from the <span class="type">GKeyFile</span>, but rather a value p
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.7.7"></a><h4>Returns</h4>
+<a name="peas-plugin-info-get-module-dir.returns"></a><h4>Returns</h4>
 <p> the module directory.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -431,7 +446,7 @@ runtime data. This is not a value read from the <span class="type">GKeyFile</spa
 value provided by the <a class="link" href="PeasEngine.html" title="PeasEngine"><span class="type">PeasEngine</span></a>, depending on where the plugin file was
 found.</p>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.8.6"></a><h4>Parameters</h4>
+<a name="peas-plugin-info-get-data-dir.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -446,9 +461,8 @@ found.</p>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.8.7"></a><h4>Returns</h4>
+<a name="peas-plugin-info-get-data-dir.returns"></a><h4>Returns</h4>
 <p> the plugin's data dir.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -462,7 +476,7 @@ peas_plugin_info_get_settings (<em class="parameter"><code>const <a class="link"
 gschemas.compiled is not in the module directory an attempt
 will be made to create it.</p>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.9.5"></a><h4>Parameters</h4>
+<a name="peas-plugin-info-get-settings.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -478,16 +492,17 @@ will be made to create it.</p>
 <tr>
 <td class="parameter_name"><p>schema_id</p></td>
 <td class="parameter_description"><p> The schema id. </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is ok, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.9.6"></a><h4>Returns</h4>
+<a name="peas-plugin-info-get-settings.returns"></a><h4>Returns</h4>
 <p> a new <span class="type">GSettings</span>, or <code class="literal">NULL</code>. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
+<p class="since">Since: <a class="link" href="api-index-1-4.html#api-index-1.4">1.4</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -501,7 +516,7 @@ loaded before the plugin, and unloaded after it. Circular dependencies of
 plugins lead to undefined loading order.</p>
 <p>The relevant key in the plugin info file is "Depends".</p>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.10.7"></a><h4>Parameters</h4>
+<a name="peas-plugin-info-get-dependencies.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -516,7 +531,7 @@ plugins lead to undefined loading order.</p>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.10.8"></a><h4>Returns</h4>
+<a name="peas-plugin-info-get-dependencies.returns"></a><h4>Returns</h4>
 <p> the plugin's dependencies. </p>
 <p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
 </div>
@@ -529,7 +544,7 @@ peas_plugin_info_has_dependency (<em class="parameter"><code>const <a class="lin
                                  <em class="parameter"><code>const <span class="type">gchar</span> *module_name</code></em>);</pre>
 <p>Check if the plugin depends on another plugin.</p>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.11.5"></a><h4>Parameters</h4>
+<a name="peas-plugin-info-has-dependency.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -551,10 +566,9 @@ peas_plugin_info_has_dependency (<em class="parameter"><code>const <a class="lin
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.11.6"></a><h4>Returns</h4>
+<a name="peas-plugin-info-has-dependency.returns"></a><h4>Returns</h4>
 <p> whether the plugin depends on the plugin <em class="parameter"><code>module_name</code></em>
 .</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -566,7 +580,7 @@ peas_plugin_info_get_name (<em class="parameter"><code>const <a class="link" hre
 <p>The name of a plugin should be a nice short string to be presented in UIs.</p>
 <p>The relevant key in the plugin info file is "Name".</p>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.12.7"></a><h4>Parameters</h4>
+<a name="peas-plugin-info-get-name.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -581,9 +595,8 @@ peas_plugin_info_get_name (<em class="parameter"><code>const <a class="link" hre
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.12.8"></a><h4>Returns</h4>
+<a name="peas-plugin-info-get-name.returns"></a><h4>Returns</h4>
 <p> the plugin's name.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -596,7 +609,7 @@ peas_plugin_info_get_description (<em class="parameter"><code>const <a class="li
 the plugin. It will typically be presented in a plugin's about box.</p>
 <p>The relevant key in the plugin info file is "Description".</p>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.13.7"></a><h4>Parameters</h4>
+<a name="peas-plugin-info-get-description.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -611,9 +624,8 @@ the plugin. It will typically be presented in a plugin's about box.</p>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.13.8"></a><h4>Returns</h4>
+<a name="peas-plugin-info-get-description.returns"></a><h4>Returns</h4>
 <p> the plugin's description.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -626,7 +638,7 @@ peas_plugin_info_get_icon_name (<em class="parameter"><code>const <a class="link
 icon is specified, the default green puzzle icon will be used.</p>
 <p>The relevant key in the plugin info file is "Icon".</p>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.14.7"></a><h4>Parameters</h4>
+<a name="peas-plugin-info-get-icon-name.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -641,9 +653,8 @@ icon is specified, the default green puzzle icon will be used.</p>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.14.8"></a><h4>Returns</h4>
+<a name="peas-plugin-info-get-icon-name.returns"></a><h4>Returns</h4>
 <p> the plugin's icon name.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -659,7 +670,7 @@ website or a ghelp: URI if a Gnome help page is available for the plugin.</p>
 keys exist for platform-specific help files. Those are "Help-GNOME",
 "Help-Windows" and "Help-MacOS-X".</p>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.15.7"></a><h4>Parameters</h4>
+<a name="peas-plugin-info-get-help-uri.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -674,9 +685,8 @@ keys exist for platform-specific help files. Those are "Help-GNOME",
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.15.8"></a><h4>Returns</h4>
+<a name="peas-plugin-info-get-help-uri.returns"></a><h4>Returns</h4>
 <p> the plugin's help URI.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -687,7 +697,7 @@ peas_plugin_info_get_authors (<em class="parameter"><code>const <a class="link" 
 <p>Gets a <code class="literal">NULL</code>-terminated array of strings with the authors of the plugin.</p>
 <p>The relevant key in the plugin info file is "Authors".</p>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.16.6"></a><h4>Parameters</h4>
+<a name="peas-plugin-info-get-authors.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -702,7 +712,7 @@ peas_plugin_info_get_authors (<em class="parameter"><code>const <a class="link" 
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.16.7"></a><h4>Returns</h4>
+<a name="peas-plugin-info-get-authors.returns"></a><h4>Returns</h4>
 <p> the plugin's author list. </p>
 <p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></p>
 </div>
@@ -715,7 +725,7 @@ peas_plugin_info_get_website (<em class="parameter"><code>const <a class="link" 
 <p>Gets the website of the plugin.</p>
 <p>The relevant key in the plugin info file is "Website".</p>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.17.6"></a><h4>Parameters</h4>
+<a name="peas-plugin-info-get-website.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -730,9 +740,8 @@ peas_plugin_info_get_website (<em class="parameter"><code>const <a class="link" 
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.17.7"></a><h4>Returns</h4>
+<a name="peas-plugin-info-get-website.returns"></a><h4>Returns</h4>
 <p> the plugin's associated website.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -743,7 +752,7 @@ peas_plugin_info_get_copyright (<em class="parameter"><code>const <a class="link
 <p>Gets the copyright of the plugin.</p>
 <p>The relevant key in the plugin info file is "Copyright".</p>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.18.6"></a><h4>Parameters</h4>
+<a name="peas-plugin-info-get-copyright.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -758,9 +767,8 @@ peas_plugin_info_get_copyright (<em class="parameter"><code>const <a class="link
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.18.7"></a><h4>Returns</h4>
+<a name="peas-plugin-info-get-copyright.returns"></a><h4>Returns</h4>
 <p> the plugin's copyright information.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -771,7 +779,7 @@ peas_plugin_info_get_version (<em class="parameter"><code>const <a class="link" 
 <p>Gets the version of the plugin.</p>
 <p>The relevant key in the plugin info file is "Version".</p>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.19.6"></a><h4>Parameters</h4>
+<a name="peas-plugin-info-get-version.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -786,9 +794,8 @@ peas_plugin_info_get_version (<em class="parameter"><code>const <a class="link" 
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.19.7"></a><h4>Returns</h4>
+<a name="peas-plugin-info-get-version.returns"></a><h4>Returns</h4>
 <p> the plugin's version.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -805,7 +812,7 @@ can use "Peas" for <em class="parameter"><code>key</code></em>
 <p>Note: that you can omit the X- prefix when retrieving the value,
 but not when specifying the value in the file.</p>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.20.7"></a><h4>Parameters</h4>
+<a name="peas-plugin-info-get-external-data.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -827,10 +834,10 @@ but not when specifying the value in the file.</p>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.3.7.20.8"></a><h4>Returns</h4>
+<a name="peas-plugin-info-get-external-data.returns"></a><h4>Returns</h4>
 <p> the external data, or <code class="literal">NULL</code> if the external data could not be found.</p>
-<p></p>
 </div>
+<p class="since">Since: <a class="link" href="api-index-1-6.html#api-index-1.6">1.6</a></p>
 </div>
 </div>
 <div class="refsect1">
@@ -847,7 +854,7 @@ be accessed using the provided API.</p>
 <p>These identify the various errors that can occur while
 loading a plugin.</p>
 <div class="refsect3">
-<a name="id-1.2.2.3.8.3.4"></a><h4>Members</h4>
+<a name="PeasPluginInfoError.members"></a><h4>Members</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="300px" class="enum_members_name">
@@ -890,7 +897,6 @@ loading a plugin.</p>
 </div>
 </div>
 <div class="footer">
-<hr>
-          Generated by GTK-Doc V1.20</div>
+<hr>Generated by GTK-Doc V1.25.1</div>
 </body>
 </html>

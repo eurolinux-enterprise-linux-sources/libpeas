@@ -7,19 +7,19 @@
  * Copyright (C) 2007-2009 Paolo Maggi, Paolo Borelli, Steve Frécinaux
  * Copyright (C) 2010 Garrett Regier
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU Library General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ * libpeas is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ * libpeas is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU Library General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -79,17 +79,42 @@ enum {
 
 static GParamSpec *properties[N_PROPERTIES] = { NULL };
 
-G_DEFINE_TYPE (PeasGtkPluginManager, peas_gtk_plugin_manager, GTK_TYPE_BOX)
+G_DEFINE_TYPE_WITH_PRIVATE (PeasGtkPluginManager,
+                            peas_gtk_plugin_manager,
+                            GTK_TYPE_BOX)
+
+static GtkWindow *
+get_toplevel (GtkWidget *widget)
+{
+  GtkWindow *toplevel;
+
+  toplevel = (GtkWindow *) gtk_widget_get_toplevel (widget);
+  if (!GTK_IS_WINDOW (toplevel))
+    return NULL;
+
+  /* Make sure the window always has a window group */
+  if (!gtk_window_has_group (toplevel))
+    {
+      GtkWindowGroup *window_group;
+
+      window_group = gtk_window_group_new ();
+      gtk_window_group_add_window (window_group, toplevel);
+      g_object_unref (window_group);
+    }
+
+  return toplevel;
+}
 
 static gboolean
 plugin_is_configurable (PeasGtkPluginManager *pm,
                         PeasPluginInfo       *info)
 {
+  PeasGtkPluginManagerPrivate *priv = peas_gtk_plugin_manager_get_instance_private (pm);
+
   if (info == NULL || !peas_plugin_info_is_loaded (info))
     return FALSE;
 
-  return peas_engine_provides_extension (pm->priv->engine,
-                                         info,
+  return peas_engine_provides_extension (priv->engine, info,
                                          PEAS_GTK_TYPE_CONFIGURABLE);
 }
 
@@ -97,8 +122,10 @@ static void
 update_button_sensitivity (PeasGtkPluginManager *pm,
                            PeasPluginInfo       *info)
 {
-  gtk_widget_set_sensitive (pm->priv->about_button, info != NULL);
-  gtk_widget_set_sensitive (pm->priv->configure_button,
+  PeasGtkPluginManagerPrivate *priv = peas_gtk_plugin_manager_get_instance_private (pm);
+
+  gtk_widget_set_sensitive (priv->about_button, info != NULL);
+  gtk_widget_set_sensitive (priv->configure_button,
                             plugin_is_configurable (pm, info));
 }
 
@@ -106,46 +133,46 @@ static void
 show_about_cb (GtkWidget            *widget,
                PeasGtkPluginManager *pm)
 {
+  PeasGtkPluginManagerPrivate *priv = peas_gtk_plugin_manager_get_instance_private (pm);
   PeasGtkPluginManagerView *view;
   PeasPluginInfo *info;
-  GtkWindow *parent;
+  GtkWindow *toplevel;
+  gboolean modal;
 
-  view = PEAS_GTK_PLUGIN_MANAGER_VIEW (pm->priv->view);
+  view = PEAS_GTK_PLUGIN_MANAGER_VIEW (priv->view);
 
   info = peas_gtk_plugin_manager_view_get_selected_plugin (view);
   g_return_if_fail (info != NULL);
 
-  /* if there is another about dialog already open destroy it */
-  if (pm->priv->about)
-    gtk_widget_destroy (pm->priv->about);
+  toplevel = get_toplevel (GTK_WIDGET (pm));
+  modal = toplevel == NULL ? FALSE : gtk_window_get_modal (toplevel);
 
-  pm->priv->about = GTK_WIDGET (g_object_new (GTK_TYPE_ABOUT_DIALOG,
-                                              "program-name", peas_plugin_info_get_name (info),
-                                              "copyright", peas_plugin_info_get_copyright (info),
-                                              "authors", peas_plugin_info_get_authors (info),
-                                              "comments", peas_plugin_info_get_description (info),
-                                              "website", peas_plugin_info_get_website (info),
-                                              "logo-icon-name", peas_plugin_info_get_icon_name (info),
-                                              "version", peas_plugin_info_get_version (info),
-                                              NULL));
+  /* If there is another about dialog already open destroy it */
+  g_clear_pointer (&priv->about, (GDestroyNotify) gtk_widget_destroy);
 
-  gtk_window_set_destroy_with_parent (GTK_WINDOW (pm->priv->about), TRUE);
+  priv->about = GTK_WIDGET (g_object_new (GTK_TYPE_ABOUT_DIALOG,
+                                          "program-name", peas_plugin_info_get_name (info),
+                                          "copyright", peas_plugin_info_get_copyright (info),
+                                          "authors", peas_plugin_info_get_authors (info),
+                                          "comments", peas_plugin_info_get_description (info),
+                                          "website", peas_plugin_info_get_website (info),
+                                          "logo-icon-name", peas_plugin_info_get_icon_name (info),
+                                          "version", peas_plugin_info_get_version (info),
+                                          "destroy-with-parent", TRUE,
+                                          "transient-for", toplevel,
+                                          "modal", modal,
+                                          NULL));
 
-  g_signal_connect (pm->priv->about,
+  g_signal_connect (priv->about,
                     "response",
                     G_CALLBACK (gtk_widget_destroy),
                     NULL);
-  g_signal_connect (pm->priv->about,
+  g_signal_connect (priv->about,
                     "destroy",
                     G_CALLBACK (gtk_widget_destroyed),
-                    &pm->priv->about);
+                    &priv->about);
 
-  parent = GTK_WINDOW (gtk_widget_get_toplevel (GTK_WIDGET (pm)));
-  gtk_window_set_transient_for (GTK_WINDOW (pm->priv->about),
-                                parent);
-  gtk_window_set_modal (GTK_WINDOW (pm->priv->about),
-                        gtk_window_get_modal (parent));
-  gtk_widget_show (pm->priv->about);
+  gtk_widget_show (priv->about);
 }
 
 static void
@@ -155,9 +182,7 @@ help_button_cb (GtkWidget      *button,
   const gchar *help_uri;
 #ifndef OS_OSX
   GError *error = NULL;
-  GtkWindow *toplevel;
   GtkWidget *error_dlg;
-  GtkWindowGroup *wg;
 #endif
 
   g_return_if_fail (peas_plugin_info_get_help_uri (info) != NULL);
@@ -168,42 +193,27 @@ help_button_cb (GtkWidget      *button,
   [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:[NSString stringWithUTF8String:help_uri]]];
 #else
 
-  gtk_show_uri (NULL,
-                help_uri,
-                GDK_CURRENT_TIME,
-                &error);
-
+  gtk_show_uri (NULL, help_uri, GDK_CURRENT_TIME, &error);
   if (error == NULL)
     return;
 
-  g_debug ("PeasGtkPluginManager: could not show help uri: '%s'", help_uri);
+  g_debug ("Failed to show help URI: '%s'", help_uri);
 
-  toplevel = GTK_WINDOW (gtk_widget_get_toplevel (button));
-  error_dlg = gtk_message_dialog_new (toplevel,
+  error_dlg = gtk_message_dialog_new (get_toplevel (button),
                                       GTK_DIALOG_MODAL |
                                       GTK_DIALOG_DESTROY_WITH_PARENT,
                                       GTK_MESSAGE_ERROR,
                                       GTK_BUTTONS_CLOSE,
                                       _("There was an error displaying the help."));
 
-  g_signal_connect (error_dlg,
-                    "response",
-                    G_CALLBACK (gtk_widget_destroy), NULL);
-
   gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (error_dlg),
                                             "%s", error->message);
 
-  if (gtk_window_has_group (toplevel))
-    {
-      wg = gtk_window_get_group (toplevel);
-    }
-  else
-    {
-      wg = gtk_window_group_new ();
-      gtk_window_group_add_window (wg, toplevel);
-    }
+  g_signal_connect (error_dlg,
+                    "response",
+                    G_CALLBACK (gtk_widget_destroy),
+                    NULL);
 
-  gtk_window_group_add_window (wg, GTK_WINDOW (error_dlg));
   gtk_widget_show_all (error_dlg);
 
   g_error_free (error);
@@ -214,19 +224,20 @@ static void
 show_configure_cb (GtkWidget            *widget,
                    PeasGtkPluginManager *pm)
 {
-  PeasGtkPluginManagerView *view = PEAS_GTK_PLUGIN_MANAGER_VIEW (pm->priv->view);
+  PeasGtkPluginManagerPrivate *priv = peas_gtk_plugin_manager_get_instance_private (pm);
+  PeasGtkPluginManagerView *view;
   PeasPluginInfo *info;
   PeasExtension *exten;
-  GtkWindow *toplevel;
   GtkWidget *conf_widget = NULL;
   GtkWidget *conf_dlg;
   GtkWidget *vbox;
-  GtkWindowGroup *wg;
+
+  view = PEAS_GTK_PLUGIN_MANAGER_VIEW (priv->view);
 
   info = peas_gtk_plugin_manager_view_get_selected_plugin (view);
   g_return_if_fail (info != NULL);
 
-  exten = peas_engine_create_extension (pm->priv->engine, info, PEAS_GTK_TYPE_CONFIGURABLE, NULL);
+  exten = peas_engine_create_extension (priv->engine, info, PEAS_GTK_TYPE_CONFIGURABLE, NULL);
   g_return_if_fail (PEAS_IS_EXTENSION (exten));
 
   conf_widget = peas_gtk_configurable_create_configure_widget (PEAS_GTK_CONFIGURABLE (exten));
@@ -235,10 +246,8 @@ show_configure_cb (GtkWidget            *widget,
   g_return_if_fail (GTK_IS_WIDGET (conf_widget));
   g_return_if_fail (!gtk_widget_is_toplevel (conf_widget));
 
-  toplevel = GTK_WINDOW (gtk_widget_get_toplevel (GTK_WIDGET (pm)));
-
   conf_dlg = gtk_dialog_new_with_buttons (peas_plugin_info_get_name (info),
-                                          toplevel,
+                                          get_toplevel (GTK_WIDGET (pm)),
                                           GTK_DIALOG_MODAL |
                                           GTK_DIALOG_DESTROY_WITH_PARENT,
                                           _("_Close"),
@@ -261,17 +270,6 @@ show_configure_cb (GtkWidget            *widget,
                         info);
     }
 
-  if (gtk_window_has_group (toplevel))
-    {
-      wg = gtk_window_get_group (toplevel);
-    }
-  else
-    {
-      wg = gtk_window_group_new ();
-      gtk_window_group_add_window (wg, toplevel);
-    }
-
-  gtk_window_group_add_window (wg, GTK_WINDOW (conf_dlg));
   gtk_widget_show_all (conf_dlg);
 
   g_signal_connect (conf_dlg,
@@ -285,10 +283,11 @@ plugin_loaded_toggled_cb (PeasEngine           *engine,
                           PeasPluginInfo       *info,
                           PeasGtkPluginManager *pm)
 {
+  PeasGtkPluginManagerPrivate *priv = peas_gtk_plugin_manager_get_instance_private (pm);
   PeasGtkPluginManagerView *view;
   PeasPluginInfo *selected;
 
-  view = PEAS_GTK_PLUGIN_MANAGER_VIEW (pm->priv->view);
+  view = PEAS_GTK_PLUGIN_MANAGER_VIEW (priv->view);
   selected = peas_gtk_plugin_manager_view_get_selected_plugin (view);
 
   if (selected == info)
@@ -298,10 +297,11 @@ plugin_loaded_toggled_cb (PeasEngine           *engine,
 static void
 selection_changed_cb (PeasGtkPluginManager *pm)
 {
+  PeasGtkPluginManagerPrivate *priv = peas_gtk_plugin_manager_get_instance_private (pm);
   PeasGtkPluginManagerView *view;
   PeasPluginInfo *info;
 
-  view = PEAS_GTK_PLUGIN_MANAGER_VIEW (pm->priv->view);
+  view = PEAS_GTK_PLUGIN_MANAGER_VIEW (priv->view);
   info = peas_gtk_plugin_manager_view_get_selected_plugin (view);
 
   update_button_sensitivity (pm, info);
@@ -333,15 +333,12 @@ populate_popup_cb (PeasGtkPluginManagerView *view,
 static void
 peas_gtk_plugin_manager_init (PeasGtkPluginManager *pm)
 {
+  PeasGtkPluginManagerPrivate *priv = peas_gtk_plugin_manager_get_instance_private (pm);
   GtkWidget *toolbar;
   GtkStyleContext *context;
   GtkToolItem *toolitem;
   GtkWidget *toolbar_box;
   GtkWidget *item_box;
-
-  pm->priv = G_TYPE_INSTANCE_GET_PRIVATE (pm,
-                                          PEAS_GTK_TYPE_PLUGIN_MANAGER,
-                                          PeasGtkPluginManagerPrivate);
 
   /* If we are using a PeasGtkPluginManager, we know for sure we will be using
      libpeas-gtk, so let's load the typelib for it here. */
@@ -351,14 +348,14 @@ peas_gtk_plugin_manager_init (PeasGtkPluginManager *pm)
   gtk_orientable_set_orientation (GTK_ORIENTABLE (pm),
                                   GTK_ORIENTATION_VERTICAL);
 
-  pm->priv->sw = gtk_scrolled_window_new (NULL, NULL);
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (pm->priv->sw),
+  priv->sw = gtk_scrolled_window_new (NULL, NULL);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (priv->sw),
                                   GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-  gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (pm->priv->sw),
+  gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (priv->sw),
                                        GTK_SHADOW_IN);
-  context = gtk_widget_get_style_context (pm->priv->sw);
+  context = gtk_widget_get_style_context (priv->sw);
   gtk_style_context_set_junction_sides (context, GTK_JUNCTION_BOTTOM);
-  gtk_box_pack_start (GTK_BOX (pm), pm->priv->sw, TRUE, TRUE, 0);
+  gtk_box_pack_start (GTK_BOX (pm), priv->sw, TRUE, TRUE, 0);
 
   toolbar = gtk_toolbar_new ();
   gtk_toolbar_set_icon_size (GTK_TOOLBAR (toolbar), GTK_ICON_SIZE_MENU);
@@ -372,33 +369,33 @@ peas_gtk_plugin_manager_init (PeasGtkPluginManager *pm)
   gtk_toolbar_insert (GTK_TOOLBAR (toolbar), toolitem, -1);
 
   /* this box is needed to get the items at the end of the toolbar */
-  toolbar_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+  toolbar_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2);
   gtk_container_add (GTK_CONTAINER (toolitem), toolbar_box);
 
   /* we need another box to disable css grouping */
   item_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
   gtk_box_pack_end (GTK_BOX (toolbar_box), item_box, FALSE, FALSE, 0);
 
-  pm->priv->about_button = gtk_button_new_with_mnemonic (_("_About"));
-  gtk_box_pack_start (GTK_BOX (item_box), pm->priv->about_button,
+  priv->about_button = gtk_button_new_with_mnemonic (_("_About"));
+  gtk_box_pack_start (GTK_BOX (item_box), priv->about_button,
                       FALSE, FALSE, 0);
 
   /* we need another box to disable css grouping */
   item_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
   gtk_box_pack_end (GTK_BOX (toolbar_box), item_box, FALSE, FALSE, 0);
 
-  pm->priv->configure_button = gtk_button_new_with_mnemonic (_("_Preferences"));
-  gtk_box_pack_start (GTK_BOX (item_box), pm->priv->configure_button,
+  priv->configure_button = gtk_button_new_with_mnemonic (_("_Preferences"));
+  gtk_box_pack_start (GTK_BOX (item_box), priv->configure_button,
                       FALSE, FALSE, 0);
 
   /* setup a window of a sane size. */
-  gtk_widget_set_size_request (GTK_WIDGET (pm->priv->sw), 270, 100);
+  gtk_widget_set_size_request (GTK_WIDGET (priv->sw), 270, 100);
 
-  g_signal_connect (pm->priv->about_button,
+  g_signal_connect (priv->about_button,
                     "clicked",
                     G_CALLBACK (show_about_cb),
                     pm);
-  g_signal_connect (pm->priv->configure_button,
+  g_signal_connect (priv->configure_button,
                     "clicked",
                     G_CALLBACK (show_configure_cb),
                     pm);
@@ -411,14 +408,15 @@ peas_gtk_plugin_manager_set_property (GObject      *object,
                                       GParamSpec   *pspec)
 {
   PeasGtkPluginManager *pm = PEAS_GTK_PLUGIN_MANAGER (object);
+  PeasGtkPluginManagerPrivate *priv = peas_gtk_plugin_manager_get_instance_private (pm);
 
   switch (prop_id)
     {
     case PROP_ENGINE:
-      pm->priv->engine = g_value_get_object (value);
+      priv->engine = g_value_get_object (value);
       break;
     case PROP_VIEW:
-      pm->priv->view = g_value_get_object (value);
+      priv->view = g_value_get_object (value);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -433,11 +431,12 @@ peas_gtk_plugin_manager_get_property (GObject    *object,
                                       GParamSpec *pspec)
 {
   PeasGtkPluginManager *pm = PEAS_GTK_PLUGIN_MANAGER (object);
+  PeasGtkPluginManagerPrivate *priv = peas_gtk_plugin_manager_get_instance_private (pm);
 
   switch (prop_id)
     {
     case PROP_ENGINE:
-      g_value_set_object (value, pm->priv->engine);
+      g_value_set_object (value, priv->engine);
       break;
     case PROP_VIEW:
       g_value_set_object (value, peas_gtk_plugin_manager_get_view (pm));
@@ -452,64 +451,70 @@ static void
 peas_gtk_plugin_manager_constructed (GObject *object)
 {
   PeasGtkPluginManager *pm = PEAS_GTK_PLUGIN_MANAGER (object);
+  PeasGtkPluginManagerPrivate *priv = peas_gtk_plugin_manager_get_instance_private (pm);
   GtkTreeSelection *selection;
 
-  if (pm->priv->engine == NULL)
-    pm->priv->engine = peas_engine_get_default ();
+  if (priv->engine == NULL)
+    priv->engine = peas_engine_get_default ();
 
-  g_object_ref (pm->priv->engine);
+  g_object_ref (priv->engine);
 
   /* When we create the manager, we always rescan the plugins directory
    * Must come after the view has connected to notify::plugin-list
    */
-  peas_engine_rescan_plugins (pm->priv->engine);
+  peas_engine_rescan_plugins (priv->engine);
 
   /* For the view to behave as expected, we must ensure it uses the same
    * engine as the manager itself.
    */
-  if (pm->priv->view != NULL)
+  if (priv->view != NULL)
     {
       PeasEngine *engine;
 
-      g_object_get (pm->priv->view,
+      g_object_get (priv->view,
                     "engine", &engine,
                     NULL);
 
-      g_warn_if_fail (engine == pm->priv->engine);
+      g_warn_if_fail (engine == priv->engine);
 
-      if (engine != pm->priv->engine)
-        g_clear_object (&pm->priv->view);
+      if (engine != priv->engine)
+        g_clear_object (&priv->view);
 
       g_object_unref (engine);
     }
 
-  if (pm->priv->view == NULL)
-    pm->priv->view = peas_gtk_plugin_manager_view_new (pm->priv->engine);
+  if (priv->view == NULL)
+    priv->view = peas_gtk_plugin_manager_view_new (priv->engine);
 
-  gtk_container_add (GTK_CONTAINER (pm->priv->sw), pm->priv->view);
+  gtk_container_add (GTK_CONTAINER (priv->sw), priv->view);
 
-  selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (pm->priv->view));
+  selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (priv->view));
 
-  g_signal_connect_swapped (selection,
-                            "changed",
-                            G_CALLBACK (selection_changed_cb),
-                            pm);
-  g_signal_connect_swapped (pm->priv->view,
-                            "cursor-changed",
-                            G_CALLBACK (selection_changed_cb),
-                            pm);
-  g_signal_connect (pm->priv->view,
-                    "populate-popup",
-                    G_CALLBACK (populate_popup_cb),
-                    pm);
-  g_signal_connect_after (pm->priv->engine,
-                          "load-plugin",
-                          G_CALLBACK (plugin_loaded_toggled_cb),
-                          pm);
-  g_signal_connect_after (pm->priv->engine,
-                          "unload-plugin",
-                          G_CALLBACK (plugin_loaded_toggled_cb),
-                          pm);
+  g_signal_connect_object (selection,
+                           "changed",
+                           G_CALLBACK (selection_changed_cb),
+                           pm,
+                           G_CONNECT_SWAPPED);
+  g_signal_connect_object (priv->view,
+                           "cursor-changed",
+                           G_CALLBACK (selection_changed_cb),
+                           pm,
+                           G_CONNECT_SWAPPED);
+  g_signal_connect_object (priv->view,
+                           "populate-popup",
+                           G_CALLBACK (populate_popup_cb),
+                           pm,
+                           0);
+  g_signal_connect_object (priv->engine,
+                           "load-plugin",
+                           G_CALLBACK (plugin_loaded_toggled_cb),
+                           pm,
+                           G_CONNECT_AFTER);
+  g_signal_connect_object (priv->engine,
+                           "unload-plugin",
+                           G_CALLBACK (plugin_loaded_toggled_cb),
+                           pm,
+                           G_CONNECT_AFTER);
 
   /* Update the button sensitivity */
   selection_changed_cb (pm);
@@ -521,14 +526,10 @@ static void
 peas_gtk_plugin_manager_dispose (GObject *object)
 {
   PeasGtkPluginManager *pm = PEAS_GTK_PLUGIN_MANAGER (object);
+  PeasGtkPluginManagerPrivate *priv = peas_gtk_plugin_manager_get_instance_private (pm);
 
-  if (pm->priv->engine != NULL)
-    {
-      g_signal_handlers_disconnect_by_func (pm->priv->engine,
-                                            plugin_loaded_toggled_cb,
-                                            pm);
-      g_clear_object (&pm->priv->engine);
-    }
+  g_clear_object (&priv->engine);
+  g_clear_pointer (&priv->about, (GDestroyNotify) gtk_widget_destroy);
 
   G_OBJECT_CLASS (peas_gtk_plugin_manager_parent_class)->dispose (object);
 }
@@ -572,7 +573,6 @@ peas_gtk_plugin_manager_class_init (PeasGtkPluginManagerClass *klass)
                          G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, N_PROPERTIES, properties);
-  g_type_class_add_private (object_class, sizeof (PeasGtkPluginManagerPrivate));
 }
 
 /**
@@ -606,7 +606,9 @@ peas_gtk_plugin_manager_new (PeasEngine *engine)
 GtkWidget *
 peas_gtk_plugin_manager_get_view (PeasGtkPluginManager *pm)
 {
+  PeasGtkPluginManagerPrivate *priv = peas_gtk_plugin_manager_get_instance_private (pm);
+
   g_return_val_if_fail (PEAS_GTK_IS_PLUGIN_MANAGER (pm), NULL);
 
-  return pm->priv->view;
+  return priv->view;
 }

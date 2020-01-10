@@ -96,14 +96,24 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 am__DEPENDENCIES_1 =
-libextension_c_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	$(builddir)/../../introspection/libintrospection-1.0.la
-am_libextension_c_la_OBJECTS = extension-c-plugin.lo
-libextension_c_la_OBJECTS = $(am_libextension_c_la_OBJECTS)
+libextension_c_missing_symbol_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
+am_libextension_c_missing_symbol_la_OBJECTS =  \
+	extension-c-missing-symbol-plugin.lo
+libextension_c_missing_symbol_la_OBJECTS =  \
+	$(am_libextension_c_missing_symbol_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
+libextension_c_missing_symbol_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) \
+	$(libextension_c_missing_symbol_la_LDFLAGS) $(LDFLAGS) -o $@
+libextension_c_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+	$(top_builddir)/libpeas/libpeas-1.0.la \
+	$(builddir)/../../introspection/libintrospection-1.0.la
+am_libextension_c_la_OBJECTS = extension-c-plugin.lo
+libextension_c_la_OBJECTS = $(am_libextension_c_la_OBJECTS)
 libextension_c_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(AM_CFLAGS) $(CFLAGS) $(libextension_c_la_LDFLAGS) $(LDFLAGS) \
@@ -142,8 +152,10 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(libextension_c_la_SOURCES)
-DIST_SOURCES = $(libextension_c_la_SOURCES)
+SOURCES = $(libextension_c_missing_symbol_la_SOURCES) \
+	$(libextension_c_la_SOURCES)
+DIST_SOURCES = $(libextension_c_missing_symbol_la_SOURCES) \
+	$(libextension_c_la_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -205,6 +217,7 @@ GLADE_CATALOG_DIR = @GLADE_CATALOG_DIR@
 GLIB_COMPILE_RESOURCES = @GLIB_COMPILE_RESOURCES@
 GLIB_GENMARSHAL = @GLIB_GENMARSHAL@
 GLIB_MKENUMS = @GLIB_MKENUMS@
+GLIB_PREFIX = @GLIB_PREFIX@
 GLIB_REQUIRED = @GLIB_REQUIRED@
 GMSGFMT = @GMSGFMT@
 GREP = @GREP@
@@ -214,6 +227,7 @@ GTKDOC_DEPS_CFLAGS = @GTKDOC_DEPS_CFLAGS@
 GTKDOC_DEPS_LIBS = @GTKDOC_DEPS_LIBS@
 GTKDOC_MKPDF = @GTKDOC_MKPDF@
 GTKDOC_REBASE = @GTKDOC_REBASE@
+GTK_PREFIX = @GTK_PREFIX@
 GTK_REQUIRED = @GTK_REQUIRED@
 HTML_DIR = @HTML_DIR@
 INSTALL = @INSTALL@
@@ -250,6 +264,9 @@ LTLIBOBJS = @LTLIBOBJS@
 LT_AGE = @LT_AGE@
 LT_CURRENT = @LT_CURRENT@
 LT_REVISION = @LT_REVISION@
+LUA51_BIN = @LUA51_BIN@
+LUA51_CFLAGS = @LUA51_CFLAGS@
+LUA51_LIBS = @LUA51_LIBS@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
@@ -286,24 +303,22 @@ PYGOBJECT_CFLAGS = @PYGOBJECT_CFLAGS@
 PYGOBJECT_LIBS = @PYGOBJECT_LIBS@
 PYTHON = @PYTHON@
 PYTHON2 = @PYTHON2@
+PYTHON2_BIN = @PYTHON2_BIN@
 PYTHON2_CFLAGS = @PYTHON2_CFLAGS@
 PYTHON2_CONFIG = @PYTHON2_CONFIG@
 PYTHON2_LDFLAGS = @PYTHON2_LDFLAGS@
 PYTHON2_LIBS = @PYTHON2_LIBS@
-PYTHON2_PYEXECDIR = @PYTHON2_PYEXECDIR@
+PYTHON3_BIN = @PYTHON3_BIN@
 PYTHON3_CFLAGS = @PYTHON3_CFLAGS@
 PYTHON3_CONFIG = @PYTHON3_CONFIG@
 PYTHON3_LDFLAGS = @PYTHON3_LDFLAGS@
 PYTHON3_LIBS = @PYTHON3_LIBS@
-PYTHON3_PYEXECDIR = @PYTHON3_PYEXECDIR@
 PYTHON_EXEC_PREFIX = @PYTHON_EXEC_PREFIX@
 PYTHON_PLATFORM = @PYTHON_PLATFORM@
 PYTHON_PREFIX = @PYTHON_PREFIX@
 PYTHON_VERSION = @PYTHON_VERSION@
 RANLIB = @RANLIB@
 SED = @SED@
-SEED_CFLAGS = @SEED_CFLAGS@
-SEED_LIBS = @SEED_LIBS@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -381,7 +396,10 @@ AM_CPPFLAGS = \
 	$(WARN_CFLAGS)		\
 	$(DISABLE_DEPRECATED)
 
-noinst_LTLIBRARIES = libextension-c.la
+noinst_LTLIBRARIES = \
+	libextension-c.la			\
+	libextension-c-missing-symbol.la
+
 libextension_c_la_SOURCES = \
 	extension-c-plugin.c	\
 	extension-c-plugin.h
@@ -389,11 +407,18 @@ libextension_c_la_SOURCES = \
 libextension_c_la_LDFLAGS = $(TEST_PLUGIN_LIBTOOL_FLAGS)
 libextension_c_la_LIBADD = \
 	$(PEAS_LIBS)						\
+	$(top_builddir)/libpeas/libpeas-1.0.la	                \
 	$(builddir)/../../introspection/libintrospection-1.0.la
 
+libextension_c_missing_symbol_la_SOURCES = \
+	extension-c-missing-symbol-plugin.c
+
+libextension_c_missing_symbol_la_LDFLAGS = $(TEST_PLUGIN_LIBTOOL_FLAGS)
+libextension_c_missing_symbol_la_LIBADD = $(PEAS_LIBS)
 noinst_PLUGIN = \
-	extension-c.gschema.xml	\
-	extension-c.plugin
+	extension-c.gschema.xml			\
+	extension-c.plugin			\
+	extension-c-missing-symbol.plugin
 
 EXTRA_DIST = $(noinst_PLUGIN)
 all: all-am
@@ -443,6 +468,9 @@ clean-noinstLTLIBRARIES:
 	  rm -f $${locs}; \
 	}
 
+libextension-c-missing-symbol.la: $(libextension_c_missing_symbol_la_OBJECTS) $(libextension_c_missing_symbol_la_DEPENDENCIES) $(EXTRA_libextension_c_missing_symbol_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(libextension_c_missing_symbol_la_LINK)  $(libextension_c_missing_symbol_la_OBJECTS) $(libextension_c_missing_symbol_la_LIBADD) $(LIBS)
+
 libextension-c.la: $(libextension_c_la_OBJECTS) $(libextension_c_la_DEPENDENCIES) $(EXTRA_libextension_c_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(libextension_c_la_LINK)  $(libextension_c_la_OBJECTS) $(libextension_c_la_LIBADD) $(LIBS)
 
@@ -452,6 +480,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extension-c-missing-symbol-plugin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extension-c-plugin.Plo@am__quote@
 
 .c.o:

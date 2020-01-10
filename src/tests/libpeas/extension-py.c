@@ -5,19 +5,19 @@
  * Copyright (C) 2011 - Steve Frécinaux
  * Copyright (C) 2011-2013 - Garrett Regier
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU Library General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ * libpeas is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ * libpeas is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU Library General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -106,22 +106,13 @@ test_extension_py_activatable_subject_refcount (PeasEngine     *engine,
   g_object_unref (object);
 }
 
-#if GLIB_CHECK_VERSION (2, 38, 0)
 static void
-test_extension_py_nonexistent (void)
-{
-  g_test_trap_subprocess (EXTENSION_TEST_NAME (PY_LOADER,
-                                               "nonexistent/subprocess"),
-                          0, 0);
-  g_test_trap_assert_passed ();
-  g_test_trap_assert_stderr ("*ImportError*");
-}
-
-static void
-test_extension_py_nonexistent_subprocess (PeasEngine *engine)
+test_extension_py_nonexistent (PeasEngine *engine)
 {
   PeasPluginInfo *info;
 
+  testing_util_push_log_hook ("Error importing plugin 'extension-"
+                              PY_LOADER_STR "-nonexistent'*");
   testing_util_push_log_hook ("Error loading plugin 'extension-"
                               PY_LOADER_STR "-nonexistent'");
 
@@ -189,11 +180,19 @@ test_extension_py_already_initialized_subprocess (void)
 static void
 test_extension_py_mixed_python (void)
 {
+  GTestSubprocessFlags flags = 0;
+
+  /* Loading both Python 2 and Python 3 might cause
+   * the linker to spew warnings, i.e. on OpenBSD, so
+   * only inherit standard error when debugging
+   */
+  if (g_getenv ("PEAS_DEBUG") != NULL)
+    flags |= G_TEST_SUBPROCESS_INHERIT_STDERR;
+
   g_test_trap_subprocess (EXTENSION_TEST_NAME (PY_LOADER,
                                                "mixed-python/subprocess"),
-                          0, G_TEST_SUBPROCESS_INHERIT_STDERR);
+                          0, flags);
   g_test_trap_assert_passed ();
-  g_test_trap_assert_stderr ("");
 }
 
 static void
@@ -207,8 +206,7 @@ test_extension_py_mixed_python_subprocess (void)
   testing_util_push_log_hook ("*'" ALT_PY_LOADER_STR
                               "' is not a valid PeasPluginLoader*");
 
-  /* Required when loading multiple loaders */
-  g_setenv ("PEAS_ALLOW_ALL_LOADERS", "1", TRUE);
+  g_setenv ("PEAS_ALLOW_CONFLICTING_LOADERS", "1", TRUE);
 
   engine = testing_engine_new ();
   peas_engine_enable_loader (engine, ALT_PY_LOADER_STR);
@@ -219,7 +217,6 @@ test_extension_py_mixed_python_subprocess (void)
 
   testing_engine_free (engine);
 }
-#endif
 #endif
 
 int
@@ -251,10 +248,7 @@ main (int   argc,
   EXTENSION_TEST (PY_LOADER, "activatable-subject-refcount",
                   activatable_subject_refcount);
 
-#if GLIB_CHECK_VERSION (2, 38, 0)
-  EXTENSION_TEST_FUNC (PY_LOADER, "nonexistent", nonexistent);
-  EXTENSION_TEST (PY_LOADER, "nonexistent/subprocess",
-                  nonexistent_subprocess);
+  EXTENSION_TEST (PY_LOADER, "nonexistent", nonexistent);
 
   EXTENSION_TEST_FUNC (PY_LOADER, "already-initialized", already_initialized);
   EXTENSION_TEST_FUNC (PY_LOADER, "already-initialized/subprocess",
@@ -264,7 +258,6 @@ main (int   argc,
   EXTENSION_TEST_FUNC (PY_LOADER, "mixed-python", mixed_python);
   EXTENSION_TEST_FUNC (PY_LOADER, "mixed-python/subprocess",
                        mixed_python_subprocess);
-#endif
 #endif
 
   return testing_extension_run_tests ();

@@ -4,6 +4,7 @@
 data/glade/libpeas-gtk.xml.in
 libpeas/peas-dirs.c
 libpeas/peas-engine.c
+libpeas/peas-extension-set.c
 libpeas/peas-object-module.c
 libpeas/peas-plugin-info.c
 libpeas/peas-plugin-loader.c
@@ -11,3 +12,4 @@ libpeas-gtk/peas-gtk-disable-plugins-dialog.c
 libpeas-gtk/peas-gtk-plugin-manager.c
 libpeas-gtk/peas-gtk-plugin-manager-view.c
 peas-demo/peas-demo.c
+tests/libpeas-gtk/plugin-manager.c

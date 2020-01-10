@@ -4,19 +4,19 @@
  *
  * Copyright (C) 2009-2010 Steve Frécinaux
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU Library General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ * libpeas is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ * libpeas is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU Library General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -57,8 +57,11 @@ create_main_window (void)
   GtkWidget *window;
   GtkWidget *box;
   GtkWidget *manager;
+  GtkWidget *scrolled_window;
   GtkWidget *button_box;
   GtkWidget *button;
+
+  gtk_window_set_default_icon_name ("libpeas-plugin");
 
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   g_signal_connect (window, "delete-event", G_CALLBACK (gtk_main_quit), NULL);
@@ -70,6 +73,12 @@ create_main_window (void)
 
   manager = peas_gtk_plugin_manager_new (peas_engine_get_default ());
   gtk_box_pack_start (GTK_BOX (box), manager, TRUE, TRUE, 0);
+
+  /* Always show all plugins, there are only a few */
+  scrolled_window = gtk_test_find_sibling (manager,
+                                           GTK_TYPE_SCROLLED_WINDOW);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolled_window),
+                                  GTK_POLICY_NEVER, GTK_POLICY_NEVER);
 
   button_box = gtk_button_box_new (GTK_ORIENTATION_HORIZONTAL);
   gtk_box_set_spacing (GTK_BOX (button_box), 6);
@@ -128,8 +137,8 @@ main (int    argc,
 
   /* We don't care about leaking memory */
   g_setenv ("PEAS_ALLOW_ALL_LOADERS", "1", TRUE);
+  peas_engine_enable_loader (engine, "lua5.1");
   peas_engine_enable_loader (engine, "python3");
-  peas_engine_enable_loader (engine, "seed");
 
   if (run_from_build_dir)
     peas_engine_add_search_path (engine, PEAS_BUILDDIR "/peas-demo/plugins", NULL);

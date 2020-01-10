@@ -45,23 +45,18 @@ AU_DEFUN([GNOME_COMMON_INIT],
 in your top-level Makefile.am, instead, where "m4" is the macro directory set
 with AC_CONFIG_MACRO_DIR() in your configure.ac]])
 
-AC_DEFUN([GNOME_DEBUG_CHECK],
+AU_DEFUN([GNOME_DEBUG_CHECK],
 [
-	AC_ARG_ENABLE([debug],
-                      AC_HELP_STRING([--enable-debug],
-                                     [turn on debugging]),,
-                      [enable_debug=no])
-
-	if test x$enable_debug = xyes ; then
-	    AC_DEFINE(GNOME_ENABLE_DEBUG, 1,
-		[Enable additional debugging at the expense of performance and size])
-	fi
-])
+	AX_CHECK_ENABLE_DEBUG([no],[GNOME_ENABLE_DEBUG])
+],
+[[$0: This macro is deprecated. You should use AX_CHECK_ENABLE_DEBUG instead and
+replace uses of GNOME_ENABLE_DEBUG with ENABLE_DEBUG.
+See: http://www.gnu.org/software/autoconf-archive/ax_check_enable_debug.html#ax_check_enable_debug]])
 
 dnl GNOME_MAINTAINER_MODE_DEFINES ()
 dnl define DISABLE_DEPRECATED
 dnl
-AC_DEFUN([GNOME_MAINTAINER_MODE_DEFINES],
+AU_DEFUN([GNOME_MAINTAINER_MODE_DEFINES],
 [
 	AC_REQUIRE([AM_MAINTAINER_MODE])
 
@@ -74,7 +69,9 @@ AC_DEFUN([GNOME_MAINTAINER_MODE_DEFINES],
 	fi
 
 	AC_SUBST(DISABLE_DEPRECATED)
-])
+],
+[[$0: This macro is deprecated. All of the modules it disables deprecations for
+are obsolete. Remove it and all uses of DISABLE_DEPRECATED.]])
 
 # gnome-compiler-flags.m4
 #
@@ -96,7 +93,7 @@ AC_DEFUN([GNOME_COMPILE_WARNINGS],[
     dnl ******************************
 
     AC_ARG_ENABLE(compile-warnings, 
-                  AC_HELP_STRING([--enable-compile-warnings=@<:@no/minimum/yes/maximum/error@:>@],
+                  AS_HELP_STRING([--enable-compile-warnings=@<:@no/minimum/yes/maximum/error@:>@],
                                  [Turn on compiler warnings]),,
                   [enable_compile_warnings="m4_default([$1],[yes])"])
 
@@ -136,15 +133,12 @@ AC_DEFUN([GNOME_COMPILE_WARNINGS],[
 
     case "$enable_compile_warnings" in
     no)
-        warning_flags=
+        warning_flags="-w"
         ;;
     minimum)
         warning_flags="-Wall"
         ;;
-    yes)
-        warning_flags="$base_warn_flags $base_error_flags $additional_flags"
-        ;;
-    maximum|error)
+    yes|maximum|error)
         warning_flags="$base_warn_flags $base_error_flags $additional_flags"
         ;;
     *)
@@ -178,7 +172,7 @@ AC_DEFUN([GNOME_COMPILE_WARNINGS],[
     AC_MSG_RESULT($tested_warning_flags)
 
     AC_ARG_ENABLE(iso-c,
-                  AC_HELP_STRING([--enable-iso-c],
+                  AS_HELP_STRING([--enable-iso-c],
                                  [Try to warn if code is not ISO C ]),,
                   [enable_iso_c=no])
 
@@ -206,7 +200,7 @@ dnl For C++, do basically the same thing.
 
 AC_DEFUN([GNOME_CXX_WARNINGS],[
   AC_ARG_ENABLE(cxx-warnings,
-                AC_HELP_STRING([--enable-cxx-warnings=@<:@no/minimum/yes@:>@]
+                AS_HELP_STRING([--enable-cxx-warnings=@<:@no/minimum/yes@:>@]
                                [Turn on compiler warnings.]),,
                 [enable_cxx_warnings="m4_default([$1],[minimum])"])
 
@@ -232,7 +226,7 @@ AC_DEFUN([GNOME_CXX_WARNINGS],[
   AC_MSG_RESULT($warnCXXFLAGS)
 
    AC_ARG_ENABLE(iso-cxx,
-                 AC_HELP_STRING([--enable-iso-cxx],
+                 AS_HELP_STRING([--enable-iso-cxx],
                                 [Try to warn if code is not ISO C++ ]),,
                  [enable_iso_cxx=no])
 
@@ -257,65 +251,63 @@ AC_DEFUN([GNOME_CXX_WARNINGS],[
   AC_SUBST(WARN_CXXFLAGS)
 ])
 
-# nls.m4 serial 5 (gettext-0.18)
-dnl Copyright (C) 1995-2003, 2005-2006, 2008-2013 Free Software Foundation,
-dnl Inc.
-dnl This file is free software; the Free Software Foundation
-dnl gives unlimited permission to copy and/or distribute it,
-dnl with or without modifications, as long as this notice is preserved.
+dnl pkg.m4 - Macros to locate and utilise pkg-config.   -*- Autoconf -*-
+dnl serial 11 (pkg-config-0.29.1)
 dnl
-dnl This file can can be used in projects which are not available under
-dnl the GNU General Public License or the GNU Library General Public
-dnl License but which still want to provide support for the GNU gettext
-dnl functionality.
-dnl Please note that the actual code of the GNU gettext library is covered
-dnl by the GNU Library General Public License, and the rest of the GNU
-dnl gettext package package is covered by the GNU General Public License.
-dnl They are *not* in the public domain.
+dnl Copyright © 2004 Scott James Remnant <scott@netsplit.com>.
+dnl Copyright © 2012-2015 Dan Nicholson <dbn.lists@gmail.com>
+dnl
+dnl This program is free software; you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation; either version 2 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful, but
+dnl WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+dnl General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program; if not, write to the Free Software
+dnl Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+dnl 02111-1307, USA.
+dnl
+dnl As a special exception to the GNU General Public License, if you
+dnl distribute this file as part of a program that contains a
+dnl configuration script generated by Autoconf, you may include it under
+dnl the same distribution terms that you use for the rest of that
+dnl program.
 
-dnl Authors:
-dnl   Ulrich Drepper <drepper@cygnus.com>, 1995-2000.
-dnl   Bruno Haible <haible@clisp.cons.org>, 2000-2003.
+dnl PKG_PREREQ(MIN-VERSION)
+dnl -----------------------
+dnl Since: 0.29
+dnl
+dnl Verify that the version of the pkg-config macros are at least
+dnl MIN-VERSION. Unlike PKG_PROG_PKG_CONFIG, which checks the user's
+dnl installed version of pkg-config, this checks the developer's version
+dnl of pkg.m4 when generating configure.
+dnl
+dnl To ensure that this macro is defined, also add:
+dnl m4_ifndef([PKG_PREREQ],
+dnl     [m4_fatal([must install pkg-config 0.29 or later before running autoconf/autogen])])
+dnl
+dnl See the "Since" comment for each macro you use to see what version
+dnl of the macros you require.
+m4_defun([PKG_PREREQ],
+[m4_define([PKG_MACROS_VERSION], [0.29.1])
+m4_if(m4_version_compare(PKG_MACROS_VERSION, [$1]), -1,
+    [m4_fatal([pkg.m4 version $1 or higher is required but ]PKG_MACROS_VERSION[ found])])
+])dnl PKG_PREREQ
 
-AC_PREREQ([2.50])
-
-AC_DEFUN([AM_NLS],
-[
-  AC_MSG_CHECKING([whether NLS is requested])
-  dnl Default is enabled NLS
-  AC_ARG_ENABLE([nls],
-    [  --disable-nls           do not use Native Language Support],
-    USE_NLS=$enableval, USE_NLS=yes)
-  AC_MSG_RESULT([$USE_NLS])
-  AC_SUBST([USE_NLS])
-])
-
-# pkg.m4 - Macros to locate and utilise pkg-config.            -*- Autoconf -*-
-# serial 1 (pkg-config-0.24)
-# 
-# Copyright © 2004 Scott James Remnant <scott@netsplit.com>.
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-# General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-#
-# As a special exception to the GNU General Public License, if you
-# distribute this file as part of a program that contains a
-# configuration script generated by Autoconf, you may include it under
-# the same distribution terms that you use for the rest of that program.
-
-# PKG_PROG_PKG_CONFIG([MIN-VERSION])
-# ----------------------------------
+dnl PKG_PROG_PKG_CONFIG([MIN-VERSION])
+dnl ----------------------------------
+dnl Since: 0.16
+dnl
+dnl Search for the pkg-config tool and set the PKG_CONFIG variable to
+dnl first found in the path. Checks that the version of pkg-config found
+dnl is at least MIN-VERSION. If MIN-VERSION is not specified, 0.9.0 is
+dnl used since that's the first version where most current features of
+dnl pkg-config existed.
 AC_DEFUN([PKG_PROG_PKG_CONFIG],
 [m4_pattern_forbid([^_?PKG_[A-Z_]+$])
 m4_pattern_allow([^PKG_CONFIG(_(PATH|LIBDIR|SYSROOT_DIR|ALLOW_SYSTEM_(CFLAGS|LIBS)))?$])
@@ -337,18 +329,19 @@ if test -n "$PKG_CONFIG"; then
 		PKG_CONFIG=""
 	fi
 fi[]dnl
-])# PKG_PROG_PKG_CONFIG
+])dnl PKG_PROG_PKG_CONFIG
 
-# PKG_CHECK_EXISTS(MODULES, [ACTION-IF-FOUND], [ACTION-IF-NOT-FOUND])
-#
-# Check to see whether a particular set of modules exists.  Similar
-# to PKG_CHECK_MODULES(), but does not set variables or print errors.
-#
-# Please remember that m4 expands AC_REQUIRE([PKG_PROG_PKG_CONFIG])
-# only at the first occurence in configure.ac, so if the first place
-# it's called might be skipped (such as if it is within an "if", you
-# have to call PKG_CHECK_EXISTS manually
-# --------------------------------------------------------------
+dnl PKG_CHECK_EXISTS(MODULES, [ACTION-IF-FOUND], [ACTION-IF-NOT-FOUND])
+dnl -------------------------------------------------------------------
+dnl Since: 0.18
+dnl
+dnl Check to see whether a particular set of modules exists. Similar to
+dnl PKG_CHECK_MODULES(), but does not set variables or print errors.
+dnl
+dnl Please remember that m4 expands AC_REQUIRE([PKG_PROG_PKG_CONFIG])
+dnl only at the first occurence in configure.ac, so if the first place
+dnl it's called might be skipped (such as if it is within an "if", you
+dnl have to call PKG_CHECK_EXISTS manually
 AC_DEFUN([PKG_CHECK_EXISTS],
 [AC_REQUIRE([PKG_PROG_PKG_CONFIG])dnl
 if test -n "$PKG_CONFIG" && \
@@ -358,8 +351,10 @@ m4_ifvaln([$3], [else
   $3])dnl
 fi])
 
-# _PKG_CONFIG([VARIABLE], [COMMAND], [MODULES])
-# ---------------------------------------------
+dnl _PKG_CONFIG([VARIABLE], [COMMAND], [MODULES])
+dnl ---------------------------------------------
+dnl Internal wrapper calling pkg-config via PKG_CONFIG and setting
+dnl pkg_failed based on the result.
 m4_define([_PKG_CONFIG],
 [if test -n "$$1"; then
     pkg_cv_[]$1="$$1"
@@ -371,10 +366,11 @@ m4_define([_PKG_CONFIG],
  else
     pkg_failed=untried
 fi[]dnl
-])# _PKG_CONFIG
+])dnl _PKG_CONFIG
 
-# _PKG_SHORT_ERRORS_SUPPORTED
-# -----------------------------
+dnl _PKG_SHORT_ERRORS_SUPPORTED
+dnl ---------------------------
+dnl Internal check to see if pkg-config supports short errors.
 AC_DEFUN([_PKG_SHORT_ERRORS_SUPPORTED],
 [AC_REQUIRE([PKG_PROG_PKG_CONFIG])
 if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
@@ -382,19 +378,17 @@ if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
 else
         _pkg_short_errors_supported=no
 fi[]dnl
-])# _PKG_SHORT_ERRORS_SUPPORTED
+])dnl _PKG_SHORT_ERRORS_SUPPORTED
 
 
-# PKG_CHECK_MODULES(VARIABLE-PREFIX, MODULES, [ACTION-IF-FOUND],
-# [ACTION-IF-NOT-FOUND])
-#
-#
-# Note that if there is a possibility the first call to
-# PKG_CHECK_MODULES might not happen, you should be sure to include an
-# explicit call to PKG_PROG_PKG_CONFIG in your configure.ac
-#
-#
-# --------------------------------------------------------------
+dnl PKG_CHECK_MODULES(VARIABLE-PREFIX, MODULES, [ACTION-IF-FOUND],
+dnl   [ACTION-IF-NOT-FOUND])
+dnl --------------------------------------------------------------
+dnl Since: 0.4.0
+dnl
+dnl Note that if there is a possibility the first call to
+dnl PKG_CHECK_MODULES might not happen, you should be sure to include an
+dnl explicit call to PKG_PROG_PKG_CONFIG in your configure.ac
 AC_DEFUN([PKG_CHECK_MODULES],
 [AC_REQUIRE([PKG_PROG_PKG_CONFIG])dnl
 AC_ARG_VAR([$1][_CFLAGS], [C compiler flags for $1, overriding pkg-config])dnl
@@ -448,7 +442,90 @@ else
         AC_MSG_RESULT([yes])
 	$3
 fi[]dnl
-])# PKG_CHECK_MODULES
+])dnl PKG_CHECK_MODULES
+
+
+dnl PKG_CHECK_MODULES_STATIC(VARIABLE-PREFIX, MODULES, [ACTION-IF-FOUND],
+dnl   [ACTION-IF-NOT-FOUND])
+dnl ---------------------------------------------------------------------
+dnl Since: 0.29
+dnl
+dnl Checks for existence of MODULES and gathers its build flags with
+dnl static libraries enabled. Sets VARIABLE-PREFIX_CFLAGS from --cflags
+dnl and VARIABLE-PREFIX_LIBS from --libs.
+dnl
+dnl Note that if there is a possibility the first call to
+dnl PKG_CHECK_MODULES_STATIC might not happen, you should be sure to
+dnl include an explicit call to PKG_PROG_PKG_CONFIG in your
+dnl configure.ac.
+AC_DEFUN([PKG_CHECK_MODULES_STATIC],
+[AC_REQUIRE([PKG_PROG_PKG_CONFIG])dnl
+_save_PKG_CONFIG=$PKG_CONFIG
+PKG_CONFIG="$PKG_CONFIG --static"
+PKG_CHECK_MODULES($@)
+PKG_CONFIG=$_save_PKG_CONFIG[]dnl
+])dnl PKG_CHECK_MODULES_STATIC
+
+
+dnl PKG_INSTALLDIR([DIRECTORY])
+dnl -------------------------
+dnl Since: 0.27
+dnl
+dnl Substitutes the variable pkgconfigdir as the location where a module
+dnl should install pkg-config .pc files. By default the directory is
+dnl $libdir/pkgconfig, but the default can be changed by passing
+dnl DIRECTORY. The user can override through the --with-pkgconfigdir
+dnl parameter.
+AC_DEFUN([PKG_INSTALLDIR],
+[m4_pushdef([pkg_default], [m4_default([$1], ['${libdir}/pkgconfig'])])
+m4_pushdef([pkg_description],
+    [pkg-config installation directory @<:@]pkg_default[@:>@])
+AC_ARG_WITH([pkgconfigdir],
+    [AS_HELP_STRING([--with-pkgconfigdir], pkg_description)],,
+    [with_pkgconfigdir=]pkg_default)
+AC_SUBST([pkgconfigdir], [$with_pkgconfigdir])
+m4_popdef([pkg_default])
+m4_popdef([pkg_description])
+])dnl PKG_INSTALLDIR
+
+
+dnl PKG_NOARCH_INSTALLDIR([DIRECTORY])
+dnl --------------------------------
+dnl Since: 0.27
+dnl
+dnl Substitutes the variable noarch_pkgconfigdir as the location where a
+dnl module should install arch-independent pkg-config .pc files. By
+dnl default the directory is $datadir/pkgconfig, but the default can be
+dnl changed by passing DIRECTORY. The user can override through the
+dnl --with-noarch-pkgconfigdir parameter.
+AC_DEFUN([PKG_NOARCH_INSTALLDIR],
+[m4_pushdef([pkg_default], [m4_default([$1], ['${datadir}/pkgconfig'])])
+m4_pushdef([pkg_description],
+    [pkg-config arch-independent installation directory @<:@]pkg_default[@:>@])
+AC_ARG_WITH([noarch-pkgconfigdir],
+    [AS_HELP_STRING([--with-noarch-pkgconfigdir], pkg_description)],,
+    [with_noarch_pkgconfigdir=]pkg_default)
+AC_SUBST([noarch_pkgconfigdir], [$with_noarch_pkgconfigdir])
+m4_popdef([pkg_default])
+m4_popdef([pkg_description])
+])dnl PKG_NOARCH_INSTALLDIR
+
+
+dnl PKG_CHECK_VAR(VARIABLE, MODULE, CONFIG-VARIABLE,
+dnl [ACTION-IF-FOUND], [ACTION-IF-NOT-FOUND])
+dnl -------------------------------------------
+dnl Since: 0.28
+dnl
+dnl Retrieves the value of the pkg-config variable for the given module.
+AC_DEFUN([PKG_CHECK_VAR],
+[AC_REQUIRE([PKG_PROG_PKG_CONFIG])dnl
+AC_ARG_VAR([$1], [value of $3 for $2, overriding pkg-config])dnl
+
+_PKG_CONFIG([$1], [variable="][$3]["], [$2])
+AS_VAR_COPY([$1], [pkg_cv_][$1])
+
+AS_VAR_IF([$1], [""], [$5], [$4])dnl
+])dnl PKG_CHECK_VAR
 
 # Configure paths for GTK+
 # Owen Taylor     1997-2001
@@ -534,14 +611,11 @@ dnl
 int 
 main ()
 {
-  int major, minor, micro;
-  char *tmp_version;
+  unsigned int major, minor, micro;
 
   fclose (fopen ("conf.gtktest", "w"));
 
-  /* HP/UX 9 (%@#!) writes to sscanf strings */
-  tmp_version = g_strdup("$min_gtk_version");
-  if (sscanf(tmp_version, "%d.%d.%d", &major, &minor, &micro) != 3) {
+  if (sscanf("$min_gtk_version", "%u.%u.%u", &major, &minor, &micro) != 3) {
      printf("%s, bad version string\n", "$min_gtk_version");
      exit(1);
    }
@@ -580,9 +654,9 @@ main ()
        }
      else
       {
-        printf("\n*** An old version of GTK+ (%d.%d.%d) was found.\n",
+        printf("\n*** An old version of GTK+ (%u.%u.%u) was found.\n",
                gtk_major_version, gtk_minor_version, gtk_micro_version);
-        printf("*** You need a version of GTK+ newer than %d.%d.%d. The latest version of\n",
+        printf("*** You need a version of GTK+ newer than %u.%u.%u. The latest version of\n",
 	       major, minor, micro);
         printf("*** GTK+ is always available from ftp://ftp.gtk.org.\n");
         printf("***\n");
@@ -633,7 +707,7 @@ main ()
           echo "*** If you have an old version installed, it is best to remove it, although"
           echo "*** you may also be able to get things to work by modifying LD_LIBRARY_PATH" ],
         [ echo "*** The test program failed to compile or link. See the file config.log for the"
-          echo "*** exact error that occured. This usually means GTK+ is incorrectly installed."])
+          echo "*** exact error that occurred. This usually means GTK+ is incorrectly installed."])
           CFLAGS="$ac_save_CFLAGS"
           LIBS="$ac_save_LIBS"
        fi
@@ -766,6 +840,39 @@ dnl   GOBJECT_INTROSPECTION_REQUIRE([minimum-g-i-version])
 AC_DEFUN([GOBJECT_INTROSPECTION_REQUIRE],
 [
   _GOBJECT_INTROSPECTION_CHECK_INTERNAL([$1], [require])
+])
+
+# nls.m4 serial 5 (gettext-0.18)
+dnl Copyright (C) 1995-2003, 2005-2006, 2008-2014, 2016 Free Software
+dnl Foundation, Inc.
+dnl This file is free software; the Free Software Foundation
+dnl gives unlimited permission to copy and/or distribute it,
+dnl with or without modifications, as long as this notice is preserved.
+dnl
+dnl This file can be used in projects which are not available under
+dnl the GNU General Public License or the GNU Library General Public
+dnl License but which still want to provide support for the GNU gettext
+dnl functionality.
+dnl Please note that the actual code of the GNU gettext library is covered
+dnl by the GNU Library General Public License, and the rest of the GNU
+dnl gettext package is covered by the GNU General Public License.
+dnl They are *not* in the public domain.
+
+dnl Authors:
+dnl   Ulrich Drepper <drepper@cygnus.com>, 1995-2000.
+dnl   Bruno Haible <haible@clisp.cons.org>, 2000-2003.
+
+AC_PREREQ([2.50])
+
+AC_DEFUN([AM_NLS],
+[
+  AC_MSG_CHECKING([whether NLS is requested])
+  dnl Default is enabled NLS
+  AC_ARG_ENABLE([nls],
+    [  --disable-nls           do not use Native Language Support],
+    USE_NLS=$enableval, USE_NLS=yes)
+  AC_MSG_RESULT([$USE_NLS])
+  AC_SUBST([USE_NLS])
 ])
 
 # Copyright (C) 2002-2013 Free Software Foundation, Inc.

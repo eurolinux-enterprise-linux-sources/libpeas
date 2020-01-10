@@ -1,5 +1,8 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* Define to compile with Lua support */
+#undef ENABLE_LUA51
+
 /* Defined if native language support should be enabled. */
 #undef ENABLE_NLS
 
@@ -8,9 +11,6 @@
 
 /* Define to compile with Python 3 support */
 #undef ENABLE_PYTHON3
-
-/* Define to compile with Seed support */
-#undef ENABLE_SEED
 
 /* maximum gdk version */
 #undef GDK_VERSION_MAX_ALLOWED
@@ -63,6 +63,15 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
+/* LGI major version. */
+#undef LGI_MAJOR_VERSION
+
+/* LGI micro version. */
+#undef LGI_MICRO_VERSION
+
+/* LGI minor version. */
+#undef LGI_MINOR_VERSION
+
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
    */
 #undef LT_OBJDIR
@@ -90,9 +99,6 @@
 
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
-
-/* Disable deprecated features */
-#undef PEAS_DISABLE_DEPRECATED_FEATURES
 
 /* Gedit Plugins Engine major version */
 #undef PEAS_MAJOR_VERSION

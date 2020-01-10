@@ -264,6 +264,7 @@ GLADE_CATALOG_DIR = @GLADE_CATALOG_DIR@
 GLIB_COMPILE_RESOURCES = @GLIB_COMPILE_RESOURCES@
 GLIB_GENMARSHAL = @GLIB_GENMARSHAL@
 GLIB_MKENUMS = @GLIB_MKENUMS@
+GLIB_PREFIX = @GLIB_PREFIX@
 GLIB_REQUIRED = @GLIB_REQUIRED@
 GMSGFMT = @GMSGFMT@
 GREP = @GREP@
@@ -273,6 +274,7 @@ GTKDOC_DEPS_CFLAGS = @GTKDOC_DEPS_CFLAGS@
 GTKDOC_DEPS_LIBS = @GTKDOC_DEPS_LIBS@
 GTKDOC_MKPDF = @GTKDOC_MKPDF@
 GTKDOC_REBASE = @GTKDOC_REBASE@
+GTK_PREFIX = @GTK_PREFIX@
 GTK_REQUIRED = @GTK_REQUIRED@
 HTML_DIR = @HTML_DIR@
 INSTALL = @INSTALL@
@@ -309,6 +311,9 @@ LTLIBOBJS = @LTLIBOBJS@
 LT_AGE = @LT_AGE@
 LT_CURRENT = @LT_CURRENT@
 LT_REVISION = @LT_REVISION@
+LUA51_BIN = @LUA51_BIN@
+LUA51_CFLAGS = @LUA51_CFLAGS@
+LUA51_LIBS = @LUA51_LIBS@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
@@ -345,24 +350,22 @@ PYGOBJECT_CFLAGS = @PYGOBJECT_CFLAGS@
 PYGOBJECT_LIBS = @PYGOBJECT_LIBS@
 PYTHON = @PYTHON@
 PYTHON2 = @PYTHON2@
+PYTHON2_BIN = @PYTHON2_BIN@
 PYTHON2_CFLAGS = @PYTHON2_CFLAGS@
 PYTHON2_CONFIG = @PYTHON2_CONFIG@
 PYTHON2_LDFLAGS = @PYTHON2_LDFLAGS@
 PYTHON2_LIBS = @PYTHON2_LIBS@
-PYTHON2_PYEXECDIR = @PYTHON2_PYEXECDIR@
+PYTHON3_BIN = @PYTHON3_BIN@
 PYTHON3_CFLAGS = @PYTHON3_CFLAGS@
 PYTHON3_CONFIG = @PYTHON3_CONFIG@
 PYTHON3_LDFLAGS = @PYTHON3_LDFLAGS@
 PYTHON3_LIBS = @PYTHON3_LIBS@
-PYTHON3_PYEXECDIR = @PYTHON3_PYEXECDIR@
 PYTHON_EXEC_PREFIX = @PYTHON_EXEC_PREFIX@
 PYTHON_PLATFORM = @PYTHON_PLATFORM@
 PYTHON_PREFIX = @PYTHON_PREFIX@
 PYTHON_VERSION = @PYTHON_VERSION@
 RANLIB = @RANLIB@
 SED = @SED@
-SEED_CFLAGS = @SEED_CFLAGS@
-SEED_LIBS = @SEED_LIBS@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -435,7 +438,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 GTESTER = gtester
 TEST_PROGS = plugin-manager plugin-manager-store plugin-manager-view
-CLEANFILES = cgdump-* vgdump-*
+CLEANFILES = callgrind-*.log valgrind-*.log
 SUBDIRS = plugins testing
 AM_CPPFLAGS = \
 	-I$(top_srcdir)			\
@@ -847,24 +850,24 @@ test: all
 @VALGRIND_ENABLED_TRUE@test-valgrind: all
 @VALGRIND_ENABLED_TRUE@	@test -z "$(TEST_PROGS)" || \
 @VALGRIND_ENABLED_TRUE@	 for test_prog in $(TEST_PROGS) ; do \
-@VALGRIND_ENABLED_TRUE@	   if test -e vgdump-$$test_prog; then \
-@VALGRIND_ENABLED_TRUE@	     unlink vgdump-$$test_prog; \
+@VALGRIND_ENABLED_TRUE@	   if test -e valgrind-$${test_prog}.log; then \
+@VALGRIND_ENABLED_TRUE@	     unlink valgrind-$${test_prog}.log; \
 @VALGRIND_ENABLED_TRUE@	   fi ; \
 @VALGRIND_ENABLED_TRUE@	   G_SLICE=always-malloc G_DEBUG=gc-friendly,resident-modules \
 @VALGRIND_ENABLED_TRUE@	     libtool --mode=execute valgrind --leak-check=full \
 @VALGRIND_ENABLED_TRUE@	     --leak-resolution=high --num-callers=20 \
 @VALGRIND_ENABLED_TRUE@	     --suppressions=$(top_srcdir)/tests/valgrind.suppressions \
-@VALGRIND_ENABLED_TRUE@	     --log-file=vgdump-$$test_prog $$test_prog || exit 1 ; \
+@VALGRIND_ENABLED_TRUE@	     --log-file=valgrind-$${test_prog}.log $$test_prog || exit 1 ; \
 @VALGRIND_ENABLED_TRUE@	 done
 
 @VALGRIND_ENABLED_TRUE@test-callgrind: all
 @VALGRIND_ENABLED_TRUE@	@test -z "$(TEST_PROGS)" || \
 @VALGRIND_ENABLED_TRUE@	 for test_prog in $(TEST_PROGS) ; do \
-@VALGRIND_ENABLED_TRUE@	   if test -e cgdump-$$test_prog; then \
-@VALGRIND_ENABLED_TRUE@	     unlink cgdump-$$test_prog; \
+@VALGRIND_ENABLED_TRUE@	   if test -e callgrind-$${test_prog}.log; then \
+@VALGRIND_ENABLED_TRUE@	     unlink callgrind-$${test_prog}.log; \
 @VALGRIND_ENABLED_TRUE@	   fi ; \
 @VALGRIND_ENABLED_TRUE@	   libtool --mode=execute valgrind --tool=callgrind \
-@VALGRIND_ENABLED_TRUE@	     --callgrind-out-file=cgdump-$$test_prog \
+@VALGRIND_ENABLED_TRUE@	     --callgrind-out-file=callgrind-$${test_prog}.log \
 @VALGRIND_ENABLED_TRUE@	     --log-file=/dev/null $$test_prog || exit 1 ; \
 @VALGRIND_ENABLED_TRUE@	 done
 

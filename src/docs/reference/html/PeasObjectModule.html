@@ -2,22 +2,22 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Peas Reference Manual: PeasObjectModule</title>
+<title>PeasObjectModule: Peas Reference Manual</title>
 <meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
 <link rel="home" href="index.html" title="Peas Reference Manual">
 <link rel="up" href="ch01.html" title="Core Classes">
 <link rel="prev" href="PeasExtensionBase.html" title="PeasExtensionBase">
 <link rel="next" href="ch02.html" title="Gtk+ Widgets">
-<meta name="generator" content="GTK-Doc V1.20 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.25.1 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
-<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="10"><tr valign="middle">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
 <td width="100%" align="left" class="shortcuts">
-<a href="#" class="shortcut">Top</a><span id="nav_description"> <span class="dim">|</span> 
-                  <a href="#PeasObjectModule.description" class="shortcut">Description</a></span><span id="nav_hierarchy"> <span class="dim">|</span> 
-                  <a href="#PeasObjectModule.object-hierarchy" class="shortcut">Object Hierarchy</a></span><span id="nav_interfaces"> <span class="dim">|</span> 
-                  <a href="#PeasObjectModule.implemented-interfaces" class="shortcut">Implemented Interfaces</a></span><span id="nav_properties"> <span class="dim">|</span> 
+<a href="#" class="shortcut">Top</a><span id="nav_description">  <span class="dim">|</span> 
+                  <a href="#PeasObjectModule.description" class="shortcut">Description</a></span><span id="nav_hierarchy">  <span class="dim">|</span> 
+                  <a href="#PeasObjectModule.object-hierarchy" class="shortcut">Object Hierarchy</a></span><span id="nav_interfaces">  <span class="dim">|</span> 
+                  <a href="#PeasObjectModule.implemented-interfaces" class="shortcut">Implemented Interfaces</a></span><span id="nav_properties">  <span class="dim">|</span> 
                   <a href="#PeasObjectModule.properties" class="shortcut">Properties</a></span>
 </td>
 <td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
@@ -79,6 +79,11 @@
 </colgroup>
 <tbody>
 <tr>
+<td class="property_type"><span class="type">gboolean</span></td>
+<td class="property_name"><a class="link" href="PeasObjectModule.html#PeasObjectModule--local-linkage" title="The “local-linkage” property">local-linkage</a></td>
+<td class="property_flags">Read / Write / Construct Only</td>
+</tr>
+<tr>
 <td class="property_type">
 <span class="type">gchar</span> *</td>
 <td class="property_name"><a class="link" href="PeasObjectModule.html#PeasObjectModule--module-name" title="The “module-name” property">module-name</a></td>
@@ -93,6 +98,12 @@
 <tr>
 <td class="property_type"><span class="type">gboolean</span></td>
 <td class="property_name"><a class="link" href="PeasObjectModule.html#PeasObjectModule--resident" title="The “resident” property">resident</a></td>
+<td class="property_flags">Read / Write / Construct Only</td>
+</tr>
+<tr>
+<td class="property_type">
+<span class="type">gchar</span> *</td>
+<td class="property_name"><a class="link" href="PeasObjectModule.html#PeasObjectModule--symbol" title="The “symbol” property">symbol</a></td>
 <td class="property_flags">Read / Write / Construct Only</td>
 </tr>
 </tbody>
@@ -149,7 +160,7 @@ function.</p>
 extension of a given type. <code class="function">g_object_newv()</code> is such a function.</p>
 <p>It is used with <a class="link" href="PeasObjectModule.html#peas-object-module-register-extension-factory" title="peas_object_module_register_extension_factory ()"><code class="function">peas_object_module_register_extension_factory()</code></a>.</p>
 <div class="refsect3">
-<a name="id-1.2.2.7.9.2.6"></a><h4>Parameters</h4>
+<a name="PeasFactoryFunc.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -176,7 +187,7 @@ extension of a given type. <code class="function">g_object_newv()</code> is such
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.7.9.2.7"></a><h4>Returns</h4>
+<a name="PeasFactoryFunc.returns"></a><h4>Returns</h4>
 <p> The created object. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
@@ -200,7 +211,7 @@ creating native types which cannot be instantiated correctly using
 <code class="function">g_object_new()</code>.  For other uses, you will usually prefer relying on
 <a class="link" href="PeasObjectModule.html#peas-object-module-register-extension-type" title="peas_object_module_register_extension_type ()"><code class="function">peas_object_module_register_extension_type()</code></a>.</p>
 <div class="refsect3">
-<a name="id-1.2.2.7.9.3.6"></a><h4>Parameters</h4>
+<a name="peas-object-module-register-extension-factory.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -252,7 +263,7 @@ peas_object_module_register_extension_type
 <em class="parameter"><code>iface_type</code></em>
 .</p>
 <div class="refsect3">
-<a name="id-1.2.2.7.9.4.5"></a><h4>Parameters</h4>
+<a name="peas-object-module-register-extension-type.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -298,24 +309,30 @@ be accessed using the provided API.</p>
 </pre>
 <p>The class structure for <a class="link" href="PeasObjectModule.html" title="PeasObjectModule"><span class="type">PeasObjectModule</span></a>.</p>
 <div class="refsect3">
-<a name="id-1.2.2.7.10.3.5"></a><h4>Members</h4>
+<a name="PeasObjectModuleClass.members"></a><h4>Members</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="300px" class="struct_members_name">
 <col class="struct_members_description">
 <col width="200px" class="struct_members_annotations">
 </colgroup>
-<tbody><tr>
-<td class="struct_member_name"><p><span class="type">GTypeModuleClass</span> <em class="structfield"><code><a name="PeasObjectModuleClass.parent-class"></a>parent_class</code></em>;</p></td>
-<td class="struct_member_description"><p>The parent class.</p></td>
-<td class="struct_member_annotations"> </td>
-</tr></tbody>
+<tbody></tbody>
 </table></div>
 </div>
 </div>
 </div>
 <div class="refsect1">
 <a name="PeasObjectModule.property-details"></a><h2>Property Details</h2>
+<div class="refsect2">
+<a name="PeasObjectModule--local-linkage"></a><h3>The <code class="literal">“local-linkage”</code> property</h3>
+<pre class="programlisting">  “local-linkage”            <span class="type">gboolean</span></pre>
+<p>This property indicates whether the module is loaded with
+local linkage, i.e. <span class="type">G_MODULE_BIND_LOCAL</span>.</p>
+<p>Since 1.14</p>
+<p>Flags: Read / Write / Construct Only</p>
+<p>Default value: FALSE</p>
+</div>
+<hr>
 <div class="refsect2">
 <a name="PeasObjectModule--module-name"></a><h3>The <code class="literal">“module-name”</code> property</h3>
 <pre class="programlisting">  “module-name”              <span class="type">gchar</span> *</pre>
@@ -339,10 +356,17 @@ be accessed using the provided API.</p>
 <p>Flags: Read / Write / Construct Only</p>
 <p>Default value: FALSE</p>
 </div>
+<hr>
+<div class="refsect2">
+<a name="PeasObjectModule--symbol"></a><h3>The <code class="literal">“symbol”</code> property</h3>
+<pre class="programlisting">  “symbol”                   <span class="type">gchar</span> *</pre>
+<p>The registration symbol to use for this module.</p>
+<p>Flags: Read / Write / Construct Only</p>
+<p>Default value: "peas_register_types"</p>
+</div>
 </div>
 </div>
 <div class="footer">
-<hr>
-          Generated by GTK-Doc V1.20</div>
+<hr>Generated by GTK-Doc V1.25.1</div>
 </body>
 </html>

@@ -24,6 +24,7 @@ endif
 libpeas_1_0_la_LIBADD = $(PEAS_LIBS)
 
 INST_H_FILES =			\
+	peas-autocleanups.h	\
 	peas-plugin-info.h	\
 	peas-object-module.h	\
 	peas-extension-base.h	\
@@ -37,14 +38,12 @@ NOINST_H_FILES =			\
 	peas-debug.h			\
 	peas-dirs.h			\
 	peas-engine-priv.h		\
-	peas-extension-wrapper.h	\
-	peas-extension-subclasses.h	\
-	peas-helpers.h			\
 	peas-i18n.h			\
 	peas-introspection.h		\
 	peas-plugin-info-priv.h		\
 	peas-plugin-loader.h		\
-	peas-plugin-loader-c.h
+	peas-plugin-loader-c.h		\
+	peas-utils.h
 
 C_FILES =				\
 	peas-activatable.c		\
@@ -54,15 +53,13 @@ C_FILES =				\
 	peas-extension.c		\
 	peas-extension-base.c		\
 	peas-extension-set.c		\
-	peas-extension-wrapper.c	\
-	peas-extension-subclasses.c	\
-	peas-helpers.c			\
 	peas-i18n.c			\
 	peas-introspection.c		\
 	peas-object-module.c		\
 	peas-plugin-info.c		\
 	peas-plugin-loader.c		\
-	peas-plugin-loader-c.c
+	peas-plugin-loader-c.c		\
+	peas-utils.c
 
 BUILT_SOURCES = \
 	peas-marshal.c			\
